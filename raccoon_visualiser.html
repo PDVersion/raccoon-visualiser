@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🦝 RACCOON BPM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --panel: #111;
+    --border: #222;
+    --accent: #ff3c00;
+    --accent2: #ffb800;
+    --text: #f0ede8;
+    --muted: #555;
+    --loop-a: #ff3c0088;
+    --loop-b: #ffb80088;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+    gap: 0;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 10vw, 6rem);
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: var(--text);
+    text-align: center;
+    margin-bottom: 4px;
+  }
+  h1 span { color: var(--accent); }
+
+  .subtitle {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    text-align: center;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* VIDEO */
+  .video-wrap {
+    position: relative;
+    background: #000;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 9/16;
+    max-height: 420px;
+    align-self: center;
+    width: auto;
+  }
+  video {
+    height: 100%;
+    width: auto;
+    display: block;
+    object-fit: contain;
+  }
+
+  /* BPM DISPLAY */
+  .bpm-readout {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(4rem, 18vw, 9rem);
+    line-height: 1;
+    color: var(--accent);
+    text-align: center;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 40px #ff3c0055;
+    user-select: none;
+    cursor: default;
+    transition: color 0.1s;
+  }
+  .bpm-readout.flash { color: var(--accent2); }
+  .bpm-unit {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: var(--muted);
+    letter-spacing: 0.3em;
+    text-align: center;
+    margin-top: -10px;
+    margin-bottom: 8px;
+  }
+
+  /* PANEL */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  /* BPM SLIDER ROW */
+  .bpm-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .slider-wrap { flex: 1; position: relative; }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 3px solid var(--bg);
+    box-shadow: 0 0 8px #ff3c0066;
+    cursor: grab;
+    transition: transform 0.1s;
+  }
+  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); cursor: grabbing; }
+  input[type=range]::-moz-range-thumb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); border: 3px solid var(--bg);
+    cursor: grab;
+  }
+
+  .bpm-input {
+    width: 88px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 1rem;
+    padding: 7px 10px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+    flex-shrink: 0;
+  }
+  .bpm-input:focus { border-color: var(--accent); }
+
+  /* PRESET BPMs */
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .preset-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.05em;
+  }
+  .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .preset-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* LOOP EDITOR */
+  .loop-section { display: flex; flex-direction: column; gap: 10px; }
+
+  .timeline-wrap {
+    position: relative;
+    height: 52px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    cursor: crosshair;
+    overflow: hidden;
+    user-select: none;
+  }
+  .timeline-track {
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    height: 4px;
+    background: var(--border);
+    transform: translateY(-50%);
+  }
+  .timeline-region {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: linear-gradient(180deg, #ff3c0022 0%, #ff3c0044 100%);
+    border-left: 2px solid var(--accent);
+    border-right: 2px solid var(--accent2);
+    pointer-events: none;
+  }
+  .timeline-cursor {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: #fff4;
+    pointer-events: none;
+    transform: translateX(-1px);
+  }
+  .handle {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 12px;
+    cursor: ew-resize;
+    transform: translateX(-6px);
+    z-index: 10;
+  }
+  .handle-A { background: linear-gradient(90deg, var(--accent)44, transparent); }
+  .handle-B { background: linear-gradient(270deg, var(--accent2)44, transparent); transform: translateX(-6px); }
+
+  .loop-times {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--muted);
+  }
+  .loop-time-val { color: var(--text); }
+
+  .loop-controls {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    padding: 7px 16px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+  }
+  .btn:hover { border-color: var(--text); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn.primary:hover { background: #ff5522; }
+  .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  .speed-badge {
+    margin-left: auto;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .speed-badge span { color: var(--accent2); }
+
+  /* NATIVE BPM */
+  .native-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .native-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
+  .native-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    color: var(--accent2);
+    letter-spacing: 0.05em;
+  }
+  .tap-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--accent2);
+    border-radius: 2px;
+    color: var(--accent2);
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    transition: all 0.15s;
+    user-select: none;
+  }
+  .tap-btn:hover { background: var(--accent2); color: #000; }
+  .tap-btn:active { transform: scale(0.95); }
+
+  .info-row {
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    line-height: 1.6;
+  }
+
+  /* PLAYBACK CONTROLS */
+  .play-controls { display: flex; gap: 8px; align-items: center; }
+
+  .play-btn {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    transition: transform 0.1s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .play-btn:hover { background: #ff5522; }
+  .play-btn:active { transform: scale(0.92); }
+
+  .loop-toggle {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+    padding: 0 14px;
+    height: 36px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .loop-toggle.on { border-color: var(--accent); color: var(--accent); background: #ff3c0011; }
+
+  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+  .playing .bpm-readout { animation: pulse 0.1s; }
+</style>
+</head>
+<body>
+
+<h1>🦝 <span>RACCOON</span> BPM</h1>
+<p class="subtitle">Video Speed · Loop Control · BPM Sync</p>
+
+<div class="app">
+
+  <!-- VIDEO -->
+  <div style="display:flex;justify-content:center;">
+    <div class="video-wrap">
+      <video id="vid" src="pedro_raccon.mp4" playsinline loop muted></video>
+    </div>
+  </div>
+
+  <!-- BPM DISPLAY -->
+  <div class="bpm-readout" id="bpmDisplay">120.0</div>
+  <div class="bpm-unit">BPM</div>
+
+  <!-- MAIN BPM PANEL -->
+  <div class="panel">
+    <div class="panel-label">Target BPM</div>
+    <div class="bpm-row">
+      <div class="slider-wrap">
+        <input type="range" id="bpmSlider" min="40" max="220" step="0.1" value="120">
+      </div>
+      <input type="number" id="bpmText" class="bpm-input" min="1" max="400" step="0.1" value="120.0">
+    </div>
+
+    <!-- PRESETS -->
+    <div>
+      <div class="panel-label">Genre presets</div>
+      <div class="presets" id="presets">
+        <button class="preset-btn" data-bpm="70">70 Ballad</button>
+        <button class="preset-btn" data-bpm="90">90 Hip-Hop</button>
+        <button class="preset-btn" data-bpm="100">100 Pop</button>
+        <button class="preset-btn" data-bpm="120">120 House</button>
+        <button class="preset-btn" data-bpm="128">128 Techno</button>
+        <button class="preset-btn" data-bpm="140">140 Trance</button>
+        <button class="preset-btn" data-bpm="160">160 D&amp;B</button>
+        <button class="preset-btn" data-bpm="174">174 Jungle</button>
+      </div>
+    </div>
+
+    <!-- NATIVE BPM & TAP -->
+    <div class="native-row">
+      <div class="native-label">Native BPM</div>
+      <div class="native-val" id="nativeDisplay">--</div>
+      <button class="tap-btn" id="tapBtn">TAP TEMPO</button>
+      <button class="btn" id="setNativeBtn" title="Set tapped tempo as native BPM">Set as Native</button>
+      <div class="speed-badge">Speed: <span id="speedBadge">1.00×</span></div>
+    </div>
+    <div class="info-row" id="infoRow">
+      Tap the beat of the video to set native BPM, then pick a target BPM above.<br>
+      Video playback rate = Target ÷ Native.
+    </div>
+
+    <!-- PLAY CONTROLS -->
+    <div class="play-controls">
+      <button class="play-btn" id="playBtn">▶</button>
+      <button class="loop-toggle" id="loopToggle">⟳ LOOP REGION</button>
+      <button class="btn" id="resetBtn">Reset Loop</button>
+    </div>
+  </div>
+
+  <!-- LOOP EDITOR PANEL -->
+  <div class="panel">
+    <div class="panel-label">Loop Region — drag handles to trim. Minimises cut visibility.</div>
+    <div class="timeline-wrap" id="timeline">
+      <div class="timeline-track"></div>
+      <div class="timeline-region" id="region"></div>
+      <div class="handle handle-A" id="handleA"></div>
+      <div class="handle handle-B" id="handleB"></div>
+      <div class="timeline-cursor" id="cursor"></div>
+    </div>
+    <div class="loop-times">
+      <span>A: <span class="loop-time-val" id="loopADisplay">0.00s</span></span>
+      <span>Duration: <span class="loop-time-val" id="loopDurDisplay">--</span></span>
+      <span>B: <span class="loop-time-val" id="loopBDisplay">--</span></span>
+    </div>
+    <div class="loop-controls">
+      <button class="btn" id="setABtn">Set A (here)</button>
+      <button class="btn" id="setBBtn">Set B (here)</button>
+      <button class="btn" id="previewBtn">Preview Loop</button>
+    </div>
+    <div class="info-row">
+      Drag the orange (A) and yellow (B) handles to define the loop region.<br>
+      Aim for a point where the raccoon is at the same phase of the bounce — this hides the cut.
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── State ───────────────────────────────────────────────────────────────────
+const vid = document.getElementById('vid');
+const DURATION = 17.016667; // actual video duration
+
+let nativeBPM = null; // user-tapped or auto-detected
+let targetBPM = 120;
+let loopA = 0;
+let loopB = DURATION;
+let loopEnabled = false;
+let tapTimes = [];
+let tapTimer = null;
+
+// ─── BPM sync helpers ────────────────────────────────────────────────────────
+function applyBPM() {
+  const rate = nativeBPM ? Math.max(0.0625, Math.min(16, targetBPM / nativeBPM)) : 1;
+  vid.playbackRate = rate;
+  document.getElementById('speedBadge').textContent = rate.toFixed(3) + '×';
+  document.getElementById('bpmDisplay').textContent = targetBPM.toFixed(1);
+  document.getElementById('bpmText').value = targetBPM.toFixed(1);
+  document.getElementById('bpmSlider').value = Math.min(220, Math.max(40, targetBPM));
+  highlightPreset();
+}
+
+function setTarget(bpm) {
+  targetBPM = Math.max(1, Math.min(400, parseFloat(bpm)));
+  applyBPM();
+}
+
+function setNative(bpm) {
+  nativeBPM = Math.max(1, parseFloat(bpm));
+  document.getElementById('nativeDisplay').textContent = nativeBPM.toFixed(1);
+  document.getElementById('infoRow').textContent =
+    `Native ${nativeBPM.toFixed(1)} BPM → playing at ${(targetBPM/nativeBPM).toFixed(3)}× speed.`;
+  applyBPM();
+}
+
+// ─── Slider + text input ─────────────────────────────────────────────────────
+document.getElementById('bpmSlider').addEventListener('input', e => setTarget(e.target.value));
+document.getElementById('bpmText').addEventListener('change', e => {
+  let v = parseFloat(e.target.value);
+  if (!isNaN(v)) setTarget(v);
+});
+document.getElementById('bpmText').addEventListener('keydown', e => {
+  if (e.key === 'Enter') { let v = parseFloat(e.target.value); if (!isNaN(v)) setTarget(v); }
+});
+
+// ─── Presets ─────────────────────────────────────────────────────────────────
+function highlightPreset() {
+  document.querySelectorAll('.preset-btn').forEach(b => {
+    b.classList.toggle('active', parseFloat(b.dataset.bpm) === Math.round(targetBPM));
+  });
+}
+document.getElementById('presets').addEventListener('click', e => {
+  if (e.target.classList.contains('preset-btn')) setTarget(e.target.dataset.bpm);
+});
+
+// ─── Tap tempo ───────────────────────────────────────────────────────────────
+document.getElementById('tapBtn').addEventListener('click', () => {
+  const now = performance.now();
+  if (tapTimer) clearTimeout(tapTimer);
+  tapTimer = setTimeout(() => { tapTimes = []; }, 2500);
+  tapTimes.push(now);
+  if (tapTimes.length > 8) tapTimes.shift();
+  if (tapTimes.length >= 2) {
+    const intervals = [];
+    for (let i = 1; i < tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i-1]);
+    const avg = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+    const tapped = 60000 / avg;
+    document.getElementById('nativeDisplay').textContent = tapped.toFixed(1) + ' (tapped)';
+    document.getElementById('setNativeBtn').dataset.pending = tapped.toFixed(2);
+  }
+});
+
+document.getElementById('setNativeBtn').addEventListener('click', () => {
+  const v = parseFloat(document.getElementById('setNativeBtn').dataset.pending || document.getElementById('nativeDisplay').textContent);
+  if (!isNaN(v)) setNative(v);
+});
+
+// ─── Play / pause ────────────────────────────────────────────────────────────
+const playBtn = document.getElementById('playBtn');
+playBtn.addEventListener('click', () => {
+  if (vid.paused) { vid.play(); playBtn.textContent = '⏸'; }
+  else { vid.pause(); playBtn.textContent = '▶'; }
+});
+
+// ─── Loop region ─────────────────────────────────────────────────────────────
+const loopToggle = document.getElementById('loopToggle');
+loopToggle.addEventListener('click', () => {
+  loopEnabled = !loopEnabled;
+  loopToggle.classList.toggle('on', loopEnabled);
+  vid.loop = !loopEnabled; // native loop off when region-looping
+});
+
+// Set A/B from current time
+document.getElementById('setABtn').addEventListener('click', () => {
+  loopA = Math.min(vid.currentTime, loopB - 0.1);
+  updateTimeline();
+});
+document.getElementById('setBBtn').addEventListener('click', () => {
+  loopB = Math.max(vid.currentTime, loopA + 0.1);
+  updateTimeline();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  loopA = 0; loopB = DURATION; updateTimeline();
+});
+document.getElementById('previewBtn').addEventListener('click', () => {
+  vid.currentTime = loopA;
+  if (vid.paused) { vid.play(); playBtn.textContent = '⏸'; }
+  loopEnabled = true;
+  loopToggle.classList.add('on');
+  vid.loop = false;
+});
+
+// Loop enforcement
+vid.addEventListener('timeupdate', () => {
+  // update cursor
+  const tl = document.getElementById('timeline');
+  const pct = vid.currentTime / DURATION;
+  document.getElementById('cursor').style.left = (pct * tl.clientWidth) + 'px';
+
+  // loop region
+  if (loopEnabled && vid.currentTime >= loopB - 0.05) {
+    vid.currentTime = loopA;
+  }
+  if (loopEnabled && vid.currentTime < loopA) {
+    vid.currentTime = loopA;
+  }
+});
+
+// ─── Timeline drag handles ───────────────────────────────────────────────────
+function updateTimeline() {
+  const tl = document.getElementById('timeline');
+  const w = tl.clientWidth;
+  const pA = loopA / DURATION, pB = loopB / DURATION;
+  document.getElementById('region').style.left = (pA * w) + 'px';
+  document.getElementById('region').style.width = ((pB - pA) * w) + 'px';
+  document.getElementById('handleA').style.left = (pA * w) + 'px';
+  document.getElementById('handleB').style.left = (pB * w) + 'px';
+  document.getElementById('loopADisplay').textContent = loopA.toFixed(2) + 's';
+  document.getElementById('loopBDisplay').textContent = loopB.toFixed(2) + 's';
+  const dur = loopB - loopA;
+  document.getElementById('loopDurDisplay').textContent = dur.toFixed(2) + 's';
+}
+
+function makeDraggable(handle, isA) {
+  let dragging = false;
+  handle.addEventListener('mousedown', start);
+  handle.addEventListener('touchstart', start, {passive:true});
+
+  function start(e) {
+    e.preventDefault && e.preventDefault();
+    dragging = true;
+    document.addEventListener('mousemove', move);
+    document.addEventListener('touchmove', move, {passive:false});
+    document.addEventListener('mouseup', end);
+    document.addEventListener('touchend', end);
+  }
+  function move(e) {
+    if (!dragging) return;
+    e.preventDefault && e.preventDefault();
+    const tl = document.getElementById('timeline');
+    const rect = tl.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    const t = pct * DURATION;
+    if (isA) loopA = Math.min(t, loopB - 0.1);
+    else loopB = Math.max(t, loopA + 0.1);
+    updateTimeline();
+  }
+  function end() {
+    dragging = false;
+    document.removeEventListener('mousemove', move);
+    document.removeEventListener('touchmove', move);
+    document.removeEventListener('mouseup', end);
+    document.removeEventListener('touchend', end);
+  }
+}
+
+makeDraggable(document.getElementById('handleA'), true);
+makeDraggable(document.getElementById('handleB'), false);
+
+// Click on timeline to seek
+document.getElementById('timeline').addEventListener('click', e => {
+  if (e.target === document.getElementById('handleA') || e.target === document.getElementById('handleB')) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  vid.currentTime = pct * DURATION;
+});
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+vid.load();
+vid.addEventListener('loadedmetadata', () => {
+  updateTimeline();
+  applyBPM();
+});
+setTarget(120);
+updateTimeline();
+
+// Flash BPM display on beat (when playing)
+let beatInterval = null;
+function restartBeatFlash() {
+  if (beatInterval) clearInterval(beatInterval);
+  if (!vid.paused && nativeBPM) {
+    const interval = 60000 / targetBPM;
+    beatInterval = setInterval(() => {
+      const d = document.getElementById('bpmDisplay');
+      d.classList.add('flash');
+      setTimeout(() => d.classList.remove('flash'), 80);
+    }, interval);
+  }
+}
+vid.addEventListener('play', restartBeatFlash);
+vid.addEventListener('pause', () => { if (beatInterval) clearInterval(beatInterval); });
+</script>
+</body>
+</html>
