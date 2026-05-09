@@ -582,7 +582,7 @@ let cropDrawing  = false;
 let cropDragPx   = { x0:0, y0:0 };
 let cropDragNorm = { nx:0, ny:0 };
 
-let currentVideo = 'videos/pedro_raccon.mp4';
+let currentVideo = 'videos/pedro_raccoon.mp4';
 
 // ═══════════════════════════════════════════════════════════════════
 // LOOP ENGINE — rAF polling guarantees the loop fires reliably
@@ -833,23 +833,35 @@ function buildVideoItem(filename, isActive) {
   return item;
 }
 
+// ── MANIFEST — edit this array to match your videos/ folder ──────
+// This is the single source of truth. The manifest.json file is kept
+// in sync as a backup, but this inline list is what the page uses.
+const VIDEO_MANIFEST = [
+  "pedro_raccoon.mp4",
+  "pedro_raccoon_full.mp4"
+];
+
 async function loadVideoList() {
   const listEl = document.getElementById('videoList');
-  let files = ['pedro_raccon.mp4'];
 
+  // Start with the inline manifest (always works, no fetch needed)
+  let files = VIDEO_MANIFEST.slice();
+
+  // Optionally try fetching manifest.json to pick up any additions
+  // without needing to edit the HTML — but never replace if fetch fails
   try {
     const res = await fetch('videos/manifest.json', { cache: 'no-cache' });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) files = data;
     }
-  } catch (_) { /* manifest not found – use default */ }
+  } catch (_) { /* use inline manifest */ }
 
   listEl.innerHTML = '';
 
   if (files.length === 0) {
     listEl.innerHTML = `<div class="no-videos">No videos found.<br>
-      Add files to <code>videos/</code> and list them in <code>videos/manifest.json</code>.</div>`;
+      Add files to <code>videos/</code> and update VIDEO_MANIFEST in the HTML.</div>`;
     return;
   }
 
