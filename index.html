@@ -17,8 +17,6 @@
     --accent2: #ffb800;
     --text: #f0ede8;
     --muted: #555;
-    --loop-a: #ff3c0088;
-    --loop-b: #ffb80088;
   }
 
   body {
@@ -30,7 +28,6 @@
     flex-direction: column;
     align-items: center;
     padding: 24px 16px 48px;
-    gap: 0;
   }
 
   h1 {
@@ -61,298 +58,355 @@
     gap: 16px;
   }
 
-  /* VIDEO */
+  /* ── VIDEO ─────────────────────────────────────────────────── */
+  .video-outer {
+    display: flex;
+    justify-content: center;
+  }
+
   .video-wrap {
     position: relative;
     background: #000;
     border: 1px solid var(--border);
     border-radius: 4px;
     overflow: hidden;
-    aspect-ratio: 9/16;
-    max-height: 420px;
-    align-self: center;
-    width: auto;
-  }
-  video {
-    height: 100%;
-    width: auto;
-    display: block;
-    object-fit: contain;
+    max-height: 480px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.3s, height 0.3s;
   }
 
-  /* BPM DISPLAY */
+  video {
+    display: block;
+    max-width: 100%;
+    max-height: 480px;
+    width: auto;
+    height: auto;
+    transform-origin: top left;
+  }
+
+  .fs-btn {
+    position: absolute; top: 8px; right: 8px; z-index: 30;
+    width: 32px; height: 32px; border-radius: 3px;
+    background: #000a; border: 1px solid #ffffff22; color: var(--text);
+    font-size: 0.9rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    backdrop-filter: blur(4px);
+  }
+  .fs-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+  .crop-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    cursor: crosshair; z-index: 20; display: none;
+  }
+
+  .crop-svg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 21; display: none;
+  }
+  .crop-svg.vis { display: block; }
+
+  /* ── ZOOM / CROP ROW ───────────────────────────────────────── */
+  .zoom-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    flex-wrap: wrap;
+  }
+  .zoom-val {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1rem; color: var(--accent2);
+    min-width: 46px; text-align: center;
+  }
+  .zoom-btn {
+    width: 28px; height: 28px;
+    background: transparent; border: 1px solid var(--border); border-radius: 2px;
+    color: var(--text); font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.15s, color 0.15s; flex-shrink: 0;
+  }
+  .zoom-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+
+  .crop-toggle-btn, .crop-reset-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    padding: 4px 10px; background: transparent;
+    border: 1px solid var(--border); border-radius: 2px;
+    color: var(--muted); cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s;
+  }
+  .crop-toggle-btn:hover { border-color: var(--accent2); color: var(--accent2); }
+  .crop-toggle-btn.active { background: var(--accent2); border-color: var(--accent2); color: #000; }
+  .crop-reset-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ── VIDEO LIST PANEL ──────────────────────────────────────── */
+  .video-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .video-list::-webkit-scrollbar { width: 4px; }
+  .video-list::-webkit-scrollbar-track { background: transparent; }
+  .video-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .video-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 2px;
+    border: 1px solid transparent;
+    cursor: pointer; transition: all 0.12s;
+    font-size: 0.72rem; letter-spacing: 0.04em; color: var(--muted);
+  }
+  .video-item:hover { border-color: var(--border); color: var(--text); background: #ffffff05; }
+  .video-item.active { border-color: var(--accent); color: var(--accent); background: #ff3c0011; }
+  .video-item-icon { font-size: 0.8rem; flex-shrink: 0; opacity: 0.5; }
+  .video-item.active .video-item-icon { opacity: 1; }
+  .video-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .video-item-dur { font-size: 0.6rem; color: var(--muted); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+
+  .no-videos { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; padding: 10px 0; line-height: 2; }
+  .no-videos code { color: var(--accent2); }
+
+  /* ── BPM DISPLAY ───────────────────────────────────────────── */
   .bpm-readout {
     font-family: 'Bebas Neue', sans-serif;
     font-size: clamp(4rem, 18vw, 9rem);
-    line-height: 1;
-    color: var(--accent);
-    text-align: center;
-    letter-spacing: 0.04em;
-    text-shadow: 0 0 40px #ff3c0055;
-    user-select: none;
-    cursor: default;
-    transition: color 0.1s;
+    line-height: 1; color: var(--accent); text-align: center;
+    letter-spacing: 0.04em; text-shadow: 0 0 40px #ff3c0055;
+    user-select: none; cursor: default; transition: color 0.1s;
   }
   .bpm-readout.flash { color: var(--accent2); }
   .bpm-unit {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    color: var(--muted);
-    letter-spacing: 0.3em;
-    text-align: center;
-    margin-top: -10px;
-    margin-bottom: 8px;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
+    color: var(--muted); letter-spacing: 0.3em; text-align: center;
+    margin-top: -10px; margin-bottom: 8px;
   }
 
-  /* PANEL */
+  /* ── PANEL ─────────────────────────────────────────────────── */
   .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 4px; padding: 20px;
+    display: flex; flex-direction: column; gap: 16px;
   }
   .panel-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.25em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 4px;
+    font-size: 0.65rem; letter-spacing: 0.25em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
   }
 
-  /* BPM SLIDER ROW */
-  .bpm-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .slider-wrap { flex: 1; position: relative; }
+  /* ── BPM SLIDER ────────────────────────────────────────────── */
+  .bpm-row { display: flex; align-items: center; gap: 12px; }
+  .slider-wrap { flex: 1; }
 
   input[type=range] {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 6px;
-    background: var(--border);
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
+    -webkit-appearance: none; width: 100%; height: 6px;
+    background: var(--border); border-radius: 3px; outline: none; cursor: pointer;
   }
   input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: 3px solid var(--bg);
-    box-shadow: 0 0 8px #ff3c0066;
-    cursor: grab;
-    transition: transform 0.1s;
+    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); border: 3px solid var(--bg);
+    box-shadow: 0 0 8px #ff3c0066; cursor: grab; transition: transform 0.1s;
   }
   input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); cursor: grabbing; }
   input[type=range]::-moz-range-thumb {
     width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); border: 3px solid var(--bg);
-    cursor: grab;
+    background: var(--accent); border: 3px solid var(--bg); cursor: grab;
   }
 
   .bpm-input {
-    width: 88px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 1rem;
-    padding: 7px 10px;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s;
-    flex-shrink: 0;
+    width: 88px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 3px; color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 1rem; padding: 7px 10px; text-align: center; outline: none;
+    transition: border-color 0.2s; flex-shrink: 0;
   }
   .bpm-input:focus { border-color: var(--accent); }
 
-  /* PRESET BPMs */
-  .presets {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-  }
+  /* ── PRESETS ───────────────────────────────────────────────── */
+  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
   .preset-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.05em;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem;
+    padding: 4px 10px; background: transparent;
+    border: 1px solid var(--border); border-radius: 2px; color: var(--muted);
+    cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
   }
   .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
   .preset-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* LOOP EDITOR */
-  .loop-section { display: flex; flex-direction: column; gap: 10px; }
-
-  .timeline-wrap {
-    position: relative;
-    height: 52px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    cursor: crosshair;
-    overflow: hidden;
-    user-select: none;
-  }
-  .timeline-track {
-    position: absolute;
-    top: 50%;
-    left: 0; right: 0;
-    height: 4px;
-    background: var(--border);
-    transform: translateY(-50%);
-  }
-  .timeline-region {
-    position: absolute;
-    top: 0; bottom: 0;
-    background: linear-gradient(180deg, #ff3c0022 0%, #ff3c0044 100%);
-    border-left: 2px solid var(--accent);
-    border-right: 2px solid var(--accent2);
-    pointer-events: none;
-  }
-  .timeline-cursor {
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 2px;
-    background: #fff4;
-    pointer-events: none;
-    transform: translateX(-1px);
-  }
-  .handle {
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 12px;
-    cursor: ew-resize;
-    transform: translateX(-6px);
-    z-index: 10;
-  }
-  .handle-A { background: linear-gradient(90deg, var(--accent)44, transparent); }
-  .handle-B { background: linear-gradient(270deg, var(--accent2)44, transparent); transform: translateX(-6px); }
-
-  .loop-times {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.65rem;
-    color: var(--muted);
-  }
-  .loop-time-val { color: var(--text); }
-
-  .loop-controls {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    padding: 7px 16px;
-    border-radius: 2px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--text);
-    cursor: pointer;
-    letter-spacing: 0.08em;
-    transition: all 0.15s;
-  }
-  .btn:hover { border-color: var(--text); }
-  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn.primary:hover { background: #ff5522; }
-  .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  .speed-badge {
-    margin-left: auto;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
-  .speed-badge span { color: var(--accent2); }
-
-  /* NATIVE BPM */
-  .native-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
+  /* ── NATIVE BPM ────────────────────────────────────────────── */
+  .native-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
   .native-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
-  .native-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    color: var(--accent2);
-    letter-spacing: 0.05em;
-  }
+  .native-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent2); }
   .tap-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    padding: 6px 14px;
-    background: transparent;
-    border: 1px solid var(--accent2);
-    border-radius: 2px;
-    color: var(--accent2);
-    cursor: pointer;
-    letter-spacing: 0.1em;
-    transition: all 0.15s;
-    user-select: none;
+    font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 6px 14px;
+    background: transparent; border: 1px solid var(--accent2);
+    border-radius: 2px; color: var(--accent2); cursor: pointer;
+    letter-spacing: 0.1em; transition: all 0.15s; user-select: none;
   }
   .tap-btn:hover { background: var(--accent2); color: #000; }
   .tap-btn:active { transform: scale(0.95); }
+  .info-row { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em; line-height: 1.6; }
+  .speed-badge { margin-left: auto; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; }
+  .speed-badge span { color: var(--accent2); }
 
-  .info-row {
-    font-size: 0.6rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    line-height: 1.6;
+  /* ── BUTTONS ───────────────────────────────────────────────── */
+  .btn {
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    padding: 7px 16px; border-radius: 2px;
+    border: 1px solid var(--border); background: transparent;
+    color: var(--text); cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s;
   }
+  .btn:hover { border-color: var(--text); }
+  .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
-  /* PLAYBACK CONTROLS */
+  /* ── PLAY CONTROLS ─────────────────────────────────────────── */
   .play-controls { display: flex; gap: 8px; align-items: center; }
-
   .play-btn {
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    background: var(--accent);
-    border: none;
-    cursor: pointer;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--accent); border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem;
-    transition: transform 0.1s, background 0.15s;
-    flex-shrink: 0;
+    font-size: 1.2rem; transition: transform 0.1s, background 0.15s; flex-shrink: 0;
   }
   .play-btn:hover { background: #ff5522; }
   .play-btn:active { transform: scale(0.92); }
 
   .loop-toggle {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem;
-    letter-spacing: 0.1em;
-    padding: 0 14px;
-    height: 36px;
-    border-radius: 2px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.15s;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.1em;
+    padding: 0 14px; height: 36px; border-radius: 2px;
+    border: 1px solid var(--border); background: transparent; color: var(--muted);
+    cursor: pointer; transition: all 0.15s;
   }
   .loop-toggle.on { border-color: var(--accent); color: var(--accent); background: #ff3c0011; }
 
-  @keyframes pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
-  .playing .bpm-readout { animation: pulse 0.1s; }
+  /* ── TIMELINE ──────────────────────────────────────────────── */
+  .timeline-wrap {
+    position: relative; height: 52px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 3px;
+    cursor: crosshair; overflow: hidden; user-select: none;
+  }
+  .timeline-track {
+    position: absolute; top: 50%; left: 0; right: 0;
+    height: 4px; background: var(--border); transform: translateY(-50%);
+  }
+  .timeline-region {
+    position: absolute; top: 0; bottom: 0;
+    background: linear-gradient(180deg, #ff3c0022, #ff3c0044);
+    border-left: 2px solid var(--accent); border-right: 2px solid var(--accent2);
+    pointer-events: none;
+  }
+  .timeline-cursor {
+    position: absolute; top: 0; bottom: 0;
+    width: 2px; background: #fff5; pointer-events: none;
+  }
+  .handle {
+    position: absolute; top: 0; bottom: 0;
+    width: 14px; cursor: ew-resize; z-index: 10; transform: translateX(-7px);
+  }
+  .handle-A { background: linear-gradient(90deg, var(--accent)66, transparent); }
+  .handle-B { background: linear-gradient(270deg, var(--accent2)66, transparent); }
+  .loop-times { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--muted); }
+  .loop-time-val { color: var(--text); }
+  .loop-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+  /* ════════════════════════════════════════════════════════════
+     FULLSCREEN OVERLAY
+  ════════════════════════════════════════════════════════════ */
+  #fsOverlay {
+    display: none; position: fixed; inset: 0; background: #000;
+    z-index: 1000; overflow: hidden;
+  }
+  #fsOverlay.active { display: block; }
+
+  #fsVideoWrap {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  #fsVideoWrap video {
+    max-width: 100%; max-height: 100%; width: auto; height: auto;
+    display: block; transform-origin: top left;
+  }
+  #fsCropCanvas {
+    position: absolute; inset: 0; cursor: crosshair; z-index: 10; display: none;
+  }
+  #fsCropSvg {
+    position: absolute; inset: 0; pointer-events: none; z-index: 11; display: none;
+    width: 100%; height: 100%;
+  }
+  #fsCropSvg.vis { display: block; }
+
+  /* ── FS BOTTOM BAR ─────────────────────────────────────────── */
+  #fsBar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 58px;
+    background: linear-gradient(0deg, #000000f2 0%, #00000099 70%, transparent 100%);
+    backdrop-filter: blur(10px);
+    display: flex; align-items: center; gap: 8px; padding: 0 14px;
+    transition: opacity 0.3s, transform 0.3s; z-index: 20;
+  }
+  #fsBar.hidden { opacity: 0; transform: translateY(14px); pointer-events: none; }
+
+  .fs-bpm {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
+    color: var(--accent); letter-spacing: 0.05em; line-height: 1;
+    text-shadow: 0 0 16px #ff3c0066; min-width: 64px; white-space: nowrap;
+  }
+  .fs-bpm.flash { color: var(--accent2); }
+
+  .fs-timeline {
+    flex: 1; position: relative; height: 22px;
+    background: #ffffff10; border-radius: 2px;
+    cursor: crosshair; overflow: hidden; user-select: none; min-width: 60px;
+  }
+  .fs-tl-region {
+    position: absolute; top: 0; bottom: 0;
+    background: #ff3c0033; border-left: 2px solid var(--accent); border-right: 2px solid var(--accent2);
+    pointer-events: none;
+  }
+  .fs-tl-cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff6; pointer-events: none; }
+  .fs-handle {
+    position: absolute; top: 0; bottom: 0; width: 10px; cursor: ew-resize; z-index: 5; transform: translateX(-5px);
+  }
+  .fs-handle-A { background: linear-gradient(90deg, var(--accent)77, transparent); }
+  .fs-handle-B { background: linear-gradient(270deg, var(--accent2)77, transparent); }
+
+  .fs-icon-btn {
+    width: 34px; height: 34px; background: transparent;
+    border: 1px solid #ffffff22; border-radius: 3px;
+    color: var(--text); font-size: 0.95rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0; font-family: 'DM Mono', monospace;
+  }
+  .fs-icon-btn:hover { border-color: #fff5; background: #ffffff11; }
+  .fs-icon-btn.go { background: var(--accent); border-color: var(--accent); }
+  .fs-icon-btn.y  { background: var(--accent2); border-color: var(--accent2); color: #000; }
+  .fs-icon-btn.on { border-color: var(--accent); color: var(--accent); }
+  .fs-exit { min-width: 44px; padding: 0 6px; font-size: 0.6rem; letter-spacing: 0.05em; }
+
+  .fs-zoom-val {
+    font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem;
+    color: var(--accent2); min-width: 36px; text-align: center;
+  }
+  .fs-bpm-input {
+    width: 60px; background: #ffffff0a; border: 1px solid #ffffff22;
+    border-radius: 2px; color: var(--text); font-family: 'DM Mono', monospace;
+    font-size: 0.7rem; padding: 4px 6px; text-align: center; outline: none;
+  }
+  .fs-bpm-input:focus { border-color: var(--accent); }
+
+  .fs-hide-hint {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    font-size: 0.55rem; color: #ffffff25; letter-spacing: 0.15em;
+    pointer-events: none; transition: opacity 0.4s; opacity: 0; white-space: nowrap;
+  }
+  .fs-hide-hint.vis { opacity: 1; }
 </style>
 </head>
 <body>
@@ -363,9 +417,35 @@
 <div class="app">
 
   <!-- VIDEO -->
-  <div style="display:flex;justify-content:center;">
-    <div class="video-wrap">
-      <video id="vid" src="pedro_raccon.mp4" playsinline loop muted></video>
+  <div class="video-outer">
+    <div class="video-wrap" id="videoWrap">
+      <video id="vid" src="videos/pedro_raccon.mp4" playsinline loop muted></video>
+      <canvas class="crop-canvas" id="cropCanvas"></canvas>
+      <svg class="crop-svg" id="cropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+      <button class="fs-btn" id="fsEnterBtn" title="Fullscreen">⛶</button>
+    </div>
+  </div>
+
+  <!-- ZOOM / CROP ROW — centered -->
+  <div class="zoom-row">
+    <span>ZOOM</span>
+    <button class="zoom-btn" id="zoomOut">−</button>
+    <span class="zoom-val" id="zoomVal">100%</span>
+    <button class="zoom-btn" id="zoomIn">+</button>
+    <button class="crop-toggle-btn" id="cropToggleBtn">✂ SET CROP</button>
+    <button class="crop-reset-btn" id="cropResetBtn">✕ RESET</button>
+  </div>
+
+  <!-- VIDEO LIBRARY PANEL -->
+  <div class="panel">
+    <div class="panel-label">Video Library — videos/ folder</div>
+    <div class="video-list" id="videoList">
+      <div class="no-videos">Loading…</div>
+    </div>
+    <div class="info-row">
+      Place video files in the <code style="color:var(--accent2)">videos/</code> folder and list them in
+      <code style="color:var(--accent2)">videos/manifest.json</code> as an array of filenames,
+      e.g. <code style="color:var(--accent2)">["pedro_raccon.mp4","clip2.mp4"]</code>
     </div>
   </div>
 
@@ -382,8 +462,6 @@
       </div>
       <input type="number" id="bpmText" class="bpm-input" min="1" max="400" step="0.1" value="120.0">
     </div>
-
-    <!-- PRESETS -->
     <div>
       <div class="panel-label">Genre presets</div>
       <div class="presets" id="presets">
@@ -397,21 +475,17 @@
         <button class="preset-btn" data-bpm="174">174 Jungle</button>
       </div>
     </div>
-
-    <!-- NATIVE BPM & TAP -->
     <div class="native-row">
       <div class="native-label">Native BPM</div>
       <div class="native-val" id="nativeDisplay">--</div>
       <button class="tap-btn" id="tapBtn">TAP TEMPO</button>
-      <button class="btn" id="setNativeBtn" title="Set tapped tempo as native BPM">Set as Native</button>
+      <button class="btn" id="setNativeBtn">Set as Native</button>
       <div class="speed-badge">Speed: <span id="speedBadge">1.00×</span></div>
     </div>
     <div class="info-row" id="infoRow">
       Tap the beat of the video to set native BPM, then pick a target BPM above.<br>
       Video playback rate = Target ÷ Native.
     </div>
-
-    <!-- PLAY CONTROLS -->
     <div class="play-controls">
       <button class="play-btn" id="playBtn">▶</button>
       <button class="loop-toggle" id="loopToggle">⟳ LOOP REGION</button>
@@ -421,7 +495,7 @@
 
   <!-- LOOP EDITOR PANEL -->
   <div class="panel">
-    <div class="panel-label">Loop Region — drag handles to trim. Minimises cut visibility.</div>
+    <div class="panel-label">Loop Region — drag handles or use Set A/B buttons</div>
     <div class="timeline-wrap" id="timeline">
       <div class="timeline-track"></div>
       <div class="timeline-region" id="region"></div>
@@ -447,35 +521,110 @@
 
 </div>
 
+<!-- FULLSCREEN OVERLAY -->
+<div id="fsOverlay">
+  <div id="fsVideoWrap">
+    <canvas id="fsCropCanvas"></canvas>
+    <svg id="fsCropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+  </div>
+
+  <div id="fsBar">
+    <button class="fs-icon-btn go" id="fsPlayBtn">▶</button>
+    <div class="fs-bpm" id="fsBpmDisplay">120.0</div>
+    <div class="fs-timeline" id="fsTimeline">
+      <div class="fs-tl-region" id="fsRegion"></div>
+      <div class="fs-handle fs-handle-A" id="fsHandleA"></div>
+      <div class="fs-handle fs-handle-B" id="fsHandleB"></div>
+      <div class="fs-tl-cursor" id="fsCursor"></div>
+    </div>
+    <button class="fs-icon-btn" id="fsLoopBtn" title="Toggle loop">⟳</button>
+    <button class="fs-icon-btn" id="fsZoomOutBtn">−</button>
+    <span class="fs-zoom-val" id="fsZoomVal">100%</span>
+    <button class="fs-icon-btn" id="fsZoomInBtn">+</button>
+    <input type="number" class="fs-bpm-input" id="fsBpmInput" min="1" max="400" step="0.1" value="120.0" title="BPM">
+    <button class="fs-icon-btn" id="fsCropBtn" title="Draw crop box">✂</button>
+    <button class="fs-icon-btn" id="fsCropResetBtn" title="Reset crop">↺</button>
+    <button class="fs-icon-btn" id="fsHideBarBtn" title="Hide controls">👁</button>
+    <button class="fs-icon-btn fs-exit" id="fsExitBtn">EXIT FS</button>
+  </div>
+
+  <div class="fs-hide-hint" id="fsHideHint">CLICK ANYWHERE TO SHOW CONTROLS</div>
+</div>
+
 <script>
-// ─── State ───────────────────────────────────────────────────────────────────
+'use strict';
+
+// ═══════════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════════
 const vid = document.getElementById('vid');
-const DURATION = 17.016667; // actual video duration
+let DURATION = 17.016667;
 
-let nativeBPM = null; // user-tapped or auto-detected
-let targetBPM = 120;
-let loopA = 0;
-let loopB = DURATION;
+let nativeBPM  = null;
+let targetBPM  = 120;
+let loopA      = 0;
+let loopB      = DURATION;
 let loopEnabled = false;
-let tapTimes = [];
-let tapTimer = null;
+let tapTimes   = [];
+let tapTimer   = null;
 
-// ─── BPM sync helpers ────────────────────────────────────────────────────────
+let crop     = { x:0, y:0, w:1, h:1 };
+let hasCrop  = false;
+let zoomLevel = 1.0;
+
+let isFS       = false;
+let barVisible = true;
+let barPinned  = false;
+let barHideTimer = null;
+
+let cropDrawMode = false;
+let cropDrawing  = false;
+let cropDragPx   = { x0:0, y0:0 };
+let cropDragNorm = { nx:0, ny:0 };
+
+let currentVideo = 'videos/pedro_raccon.mp4';
+
+// ═══════════════════════════════════════════════════════════════════
+// LOOP ENGINE — rAF polling guarantees the loop fires reliably
+// (timeupdate only fires ~4–8 Hz which causes missed boundaries)
+// ═══════════════════════════════════════════════════════════════════
+function rafLoop() {
+  if (!vid.paused && loopEnabled) {
+    const t = vid.currentTime;
+    if (t >= loopB - 0.04 || t < loopA - 0.04) {
+      vid.currentTime = loopA;
+    }
+  }
+  // Update cursors every frame
+  const dur = vid.duration || DURATION || 1;
+  const pct = vid.currentTime / dur;
+  const tl   = document.getElementById('timeline');
+  const fstl = document.getElementById('fsTimeline');
+  document.getElementById('cursor').style.left  = (pct * tl.clientWidth)   + 'px';
+  document.getElementById('fsCursor').style.left = (pct * fstl.clientWidth) + 'px';
+  requestAnimationFrame(rafLoop);
+}
+requestAnimationFrame(rafLoop);
+
+// ═══════════════════════════════════════════════════════════════════
+// BPM
+// ═══════════════════════════════════════════════════════════════════
 function applyBPM() {
   const rate = nativeBPM ? Math.max(0.0625, Math.min(16, targetBPM / nativeBPM)) : 1;
   vid.playbackRate = rate;
-  document.getElementById('speedBadge').textContent = rate.toFixed(3) + '×';
-  document.getElementById('bpmDisplay').textContent = targetBPM.toFixed(1);
-  document.getElementById('bpmText').value = targetBPM.toFixed(1);
-  document.getElementById('bpmSlider').value = Math.min(220, Math.max(40, targetBPM));
+  const d = targetBPM.toFixed(1);
+  document.getElementById('speedBadge').textContent  = rate.toFixed(3) + '×';
+  document.getElementById('bpmDisplay').textContent  = d;
+  document.getElementById('bpmText').value           = d;
+  document.getElementById('bpmSlider').value         = Math.min(220, Math.max(40, targetBPM));
+  document.getElementById('fsBpmDisplay').textContent = d;
+  document.getElementById('fsBpmInput').value         = d;
   highlightPreset();
 }
-
 function setTarget(bpm) {
-  targetBPM = Math.max(1, Math.min(400, parseFloat(bpm)));
+  targetBPM = Math.max(1, Math.min(400, parseFloat(bpm) || 120));
   applyBPM();
 }
-
 function setNative(bpm) {
   nativeBPM = Math.max(1, parseFloat(bpm));
   document.getElementById('nativeDisplay').textContent = nativeBPM.toFixed(1);
@@ -484,183 +633,617 @@ function setNative(bpm) {
   applyBPM();
 }
 
-// ─── Slider + text input ─────────────────────────────────────────────────────
 document.getElementById('bpmSlider').addEventListener('input', e => setTarget(e.target.value));
-document.getElementById('bpmText').addEventListener('change', e => {
-  let v = parseFloat(e.target.value);
-  if (!isNaN(v)) setTarget(v);
-});
-document.getElementById('bpmText').addEventListener('keydown', e => {
-  if (e.key === 'Enter') { let v = parseFloat(e.target.value); if (!isNaN(v)) setTarget(v); }
+['bpmText','fsBpmInput'].forEach(id => {
+  const el = document.getElementById(id);
+  el.addEventListener('change', e => setTarget(e.target.value));
+  el.addEventListener('keydown', e => { if (e.key === 'Enter') setTarget(e.target.value); });
 });
 
-// ─── Presets ─────────────────────────────────────────────────────────────────
 function highlightPreset() {
-  document.querySelectorAll('.preset-btn').forEach(b => {
-    b.classList.toggle('active', parseFloat(b.dataset.bpm) === Math.round(targetBPM));
-  });
+  document.querySelectorAll('.preset-btn').forEach(b =>
+    b.classList.toggle('active', parseFloat(b.dataset.bpm) === Math.round(targetBPM))
+  );
 }
 document.getElementById('presets').addEventListener('click', e => {
   if (e.target.classList.contains('preset-btn')) setTarget(e.target.dataset.bpm);
 });
 
-// ─── Tap tempo ───────────────────────────────────────────────────────────────
+// Tap tempo
 document.getElementById('tapBtn').addEventListener('click', () => {
   const now = performance.now();
-  if (tapTimer) clearTimeout(tapTimer);
+  clearTimeout(tapTimer);
   tapTimer = setTimeout(() => { tapTimes = []; }, 2500);
   tapTimes.push(now);
   if (tapTimes.length > 8) tapTimes.shift();
   if (tapTimes.length >= 2) {
-    const intervals = [];
-    for (let i = 1; i < tapTimes.length; i++) intervals.push(tapTimes[i] - tapTimes[i-1]);
-    const avg = intervals.reduce((a,b)=>a+b,0) / intervals.length;
+    const ints = [];
+    for (let i = 1; i < tapTimes.length; i++) ints.push(tapTimes[i] - tapTimes[i-1]);
+    const avg = ints.reduce((a,b) => a+b, 0) / ints.length;
     const tapped = 60000 / avg;
     document.getElementById('nativeDisplay').textContent = tapped.toFixed(1) + ' (tapped)';
     document.getElementById('setNativeBtn').dataset.pending = tapped.toFixed(2);
   }
 });
-
 document.getElementById('setNativeBtn').addEventListener('click', () => {
-  const v = parseFloat(document.getElementById('setNativeBtn').dataset.pending || document.getElementById('nativeDisplay').textContent);
-  if (!isNaN(v)) setNative(v);
+  const raw = document.getElementById('setNativeBtn').dataset.pending
+    || document.getElementById('nativeDisplay').textContent;
+  const v = parseFloat(raw);
+  if (!isNaN(v) && v > 0) setNative(v);
 });
 
-// ─── Play / pause ────────────────────────────────────────────────────────────
-const playBtn = document.getElementById('playBtn');
-playBtn.addEventListener('click', () => {
-  if (vid.paused) { vid.play(); playBtn.textContent = '⏸'; }
-  else { vid.pause(); playBtn.textContent = '▶'; }
-});
+// ═══════════════════════════════════════════════════════════════════
+// PLAY / PAUSE
+// ═══════════════════════════════════════════════════════════════════
+function syncPlayBtns() {
+  const p = vid.paused;
+  document.getElementById('playBtn').textContent   = p ? '▶' : '⏸';
+  document.getElementById('fsPlayBtn').textContent = p ? '▶' : '⏸';
+  document.getElementById('fsPlayBtn').classList.toggle('go', p);
+}
+['playBtn','fsPlayBtn'].forEach(id =>
+  document.getElementById(id).addEventListener('click', () =>
+    vid.paused ? vid.play() : vid.pause()
+  )
+);
+vid.addEventListener('play',  syncPlayBtns);
+vid.addEventListener('pause', syncPlayBtns);
 
-// ─── Loop region ─────────────────────────────────────────────────────────────
-const loopToggle = document.getElementById('loopToggle');
-loopToggle.addEventListener('click', () => {
-  loopEnabled = !loopEnabled;
-  loopToggle.classList.toggle('on', loopEnabled);
-  vid.loop = !loopEnabled; // native loop off when region-looping
-});
+// ═══════════════════════════════════════════════════════════════════
+// LOOP REGION
+// ═══════════════════════════════════════════════════════════════════
+function syncLoopBtns() {
+  document.getElementById('loopToggle').classList.toggle('on', loopEnabled);
+  document.getElementById('fsLoopBtn').classList.toggle('on',  loopEnabled);
+  // When we manage looping ourselves, turn off the native video loop
+  vid.loop = !loopEnabled;
+}
+['loopToggle','fsLoopBtn'].forEach(id =>
+  document.getElementById(id).addEventListener('click', () => {
+    loopEnabled = !loopEnabled;
+    syncLoopBtns();
+  })
+);
 
-// Set A/B from current time
 document.getElementById('setABtn').addEventListener('click', () => {
-  loopA = Math.min(vid.currentTime, loopB - 0.1);
-  updateTimeline();
+  loopA = Math.min(vid.currentTime, loopB - 0.1); updateTimeline();
 });
 document.getElementById('setBBtn').addEventListener('click', () => {
-  loopB = Math.max(vid.currentTime, loopA + 0.1);
-  updateTimeline();
+  loopB = Math.max(vid.currentTime, loopA + 0.1); updateTimeline();
 });
 document.getElementById('resetBtn').addEventListener('click', () => {
-  loopA = 0; loopB = DURATION; updateTimeline();
+  loopA = 0; loopB = vid.duration || DURATION; updateTimeline();
 });
 document.getElementById('previewBtn').addEventListener('click', () => {
   vid.currentTime = loopA;
-  if (vid.paused) { vid.play(); playBtn.textContent = '⏸'; }
-  loopEnabled = true;
-  loopToggle.classList.add('on');
-  vid.loop = false;
+  loopEnabled = true; syncLoopBtns();
+  if (vid.paused) vid.play();
 });
 
-// Loop enforcement
-vid.addEventListener('timeupdate', () => {
-  // update cursor
-  const tl = document.getElementById('timeline');
-  const pct = vid.currentTime / DURATION;
-  document.getElementById('cursor').style.left = (pct * tl.clientWidth) + 'px';
-
-  // loop region
-  if (loopEnabled && vid.currentTime >= loopB - 0.05) {
-    vid.currentTime = loopA;
-  }
-  if (loopEnabled && vid.currentTime < loopA) {
-    vid.currentTime = loopA;
-  }
-});
-
-// ─── Timeline drag handles ───────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// TIMELINE UI
+// ═══════════════════════════════════════════════════════════════════
 function updateTimeline() {
-  const tl = document.getElementById('timeline');
-  const w = tl.clientWidth;
-  const pA = loopA / DURATION, pB = loopB / DURATION;
-  document.getElementById('region').style.left = (pA * w) + 'px';
+  const dur = vid.duration || DURATION || 1;
+  const pA  = loopA / dur, pB = loopB / dur;
+
+  const tl  = document.getElementById('timeline');
+  const w   = tl.clientWidth;
+  document.getElementById('region').style.left  = (pA * w) + 'px';
   document.getElementById('region').style.width = ((pB - pA) * w) + 'px';
   document.getElementById('handleA').style.left = (pA * w) + 'px';
   document.getElementById('handleB').style.left = (pB * w) + 'px';
-  document.getElementById('loopADisplay').textContent = loopA.toFixed(2) + 's';
-  document.getElementById('loopBDisplay').textContent = loopB.toFixed(2) + 's';
-  const dur = loopB - loopA;
-  document.getElementById('loopDurDisplay').textContent = dur.toFixed(2) + 's';
+  document.getElementById('loopADisplay').textContent   = loopA.toFixed(2) + 's';
+  document.getElementById('loopBDisplay').textContent   = loopB.toFixed(2) + 's';
+  document.getElementById('loopDurDisplay').textContent = (loopB - loopA).toFixed(2) + 's';
+
+  const fstl = document.getElementById('fsTimeline');
+  const fw   = fstl.clientWidth;
+  document.getElementById('fsRegion').style.left  = (pA * fw) + 'px';
+  document.getElementById('fsRegion').style.width = ((pB - pA) * fw) + 'px';
+  document.getElementById('fsHandleA').style.left = (pA * fw) + 'px';
+  document.getElementById('fsHandleB').style.left = (pB * fw) + 'px';
 }
 
-function makeDraggable(handle, isA) {
+function makeHandleDraggable(handleId, isA) {
+  const handle = document.getElementById(handleId);
+  const tlId   = handleId.startsWith('fs') ? 'fsTimeline' : 'timeline';
   let dragging = false;
-  handle.addEventListener('mousedown', start);
-  handle.addEventListener('touchstart', start, {passive:true});
 
+  function getT(cx) {
+    const tl   = document.getElementById(tlId);
+    const rect = tl.getBoundingClientRect();
+    return Math.max(0, Math.min(1, (cx - rect.left) / rect.width)) * (vid.duration || DURATION);
+  }
   function start(e) {
     e.preventDefault && e.preventDefault();
     dragging = true;
     document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup',   stop);
     document.addEventListener('touchmove', move, {passive:false});
-    document.addEventListener('mouseup', end);
-    document.addEventListener('touchend', end);
+    document.addEventListener('touchend',  stop);
   }
   function move(e) {
     if (!dragging) return;
     e.preventDefault && e.preventDefault();
-    const tl = document.getElementById('timeline');
-    const rect = tl.getBoundingClientRect();
-    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-    const pct = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
-    const t = pct * DURATION;
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const t  = getT(cx);
     if (isA) loopA = Math.min(t, loopB - 0.1);
-    else loopB = Math.max(t, loopA + 0.1);
+    else     loopB = Math.max(t, loopA + 0.1);
     updateTimeline();
   }
-  function end() {
+  function stop() {
     dragging = false;
     document.removeEventListener('mousemove', move);
+    document.removeEventListener('mouseup',   stop);
     document.removeEventListener('touchmove', move);
-    document.removeEventListener('mouseup', end);
-    document.removeEventListener('touchend', end);
+    document.removeEventListener('touchend',  stop);
   }
+  handle.addEventListener('mousedown', start);
+  handle.addEventListener('touchstart', e => { e.preventDefault(); start(e); }, {passive:false});
+}
+makeHandleDraggable('handleA',   true);
+makeHandleDraggable('handleB',   false);
+makeHandleDraggable('fsHandleA', true);
+makeHandleDraggable('fsHandleB', false);
+
+// Click timeline to seek
+function addSeek(tlId) {
+  document.getElementById(tlId).addEventListener('click', e => {
+    const aId = tlId === 'timeline' ? 'handleA' : 'fsHandleA';
+    const bId = tlId === 'timeline' ? 'handleB' : 'fsHandleB';
+    if (e.target.id === aId || e.target.id === bId) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    vid.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * (vid.duration || DURATION);
+  });
+}
+addSeek('timeline');
+addSeek('fsTimeline');
+
+// ═══════════════════════════════════════════════════════════════════
+// VIDEO LIST
+// ═══════════════════════════════════════════════════════════════════
+function fmtDur(s) {
+  if (!isFinite(s) || s <= 0) return '';
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60).toString().padStart(2, '0');
+  return `${m}:${sec}`;
 }
 
-makeDraggable(document.getElementById('handleA'), true);
-makeDraggable(document.getElementById('handleB'), false);
+function buildVideoItem(filename, isActive) {
+  const item = document.createElement('div');
+  item.className = 'video-item' + (isActive ? ' active' : '');
+  const name = filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  item.innerHTML = `
+    <span class="video-item-icon">▶</span>
+    <span class="video-item-name" title="${filename}">${name}</span>
+    <span class="video-item-dur" id="vdur-${encodeURIComponent(filename)}"></span>
+  `;
+  item.addEventListener('click', () => loadVideo('videos/' + filename, item));
 
-// Click on timeline to seek
-document.getElementById('timeline').addEventListener('click', e => {
-  if (e.target === document.getElementById('handleA') || e.target === document.getElementById('handleB')) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  const pct = (e.clientX - rect.left) / rect.width;
-  vid.currentTime = pct * DURATION;
-});
+  // Probe duration in background
+  const probe = document.createElement('video');
+  probe.preload = 'metadata';
+  probe.src = 'videos/' + filename;
+  probe.addEventListener('loadedmetadata', () => {
+    const el = document.getElementById('vdur-' + encodeURIComponent(filename));
+    if (el) el.textContent = fmtDur(probe.duration);
+    probe.src = '';
+  });
 
-// ─── Init ─────────────────────────────────────────────────────────────────────
-vid.load();
+  return item;
+}
+
+async function loadVideoList() {
+  const listEl = document.getElementById('videoList');
+  let files = ['pedro_raccon.mp4'];
+
+  try {
+    const res = await fetch('videos/manifest.json', { cache: 'no-cache' });
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) files = data;
+    }
+  } catch (_) { /* manifest not found – use default */ }
+
+  listEl.innerHTML = '';
+
+  if (files.length === 0) {
+    listEl.innerHTML = `<div class="no-videos">No videos found.<br>
+      Add files to <code>videos/</code> and list them in <code>videos/manifest.json</code>.</div>`;
+    return;
+  }
+
+  files.forEach(f => {
+    const active = ('videos/' + f === currentVideo || f === currentVideo);
+    listEl.appendChild(buildVideoItem(f, active));
+  });
+}
+
+function loadVideo(src, itemEl) {
+  currentVideo = src;
+  // Reset everything
+  hasCrop = false; crop = { x:0, y:0, w:1, h:1 }; zoomLevel = 1;
+  loopEnabled = false; syncLoopBtns();
+  nativeBPM = null;
+  document.getElementById('nativeDisplay').textContent = '--';
+  document.getElementById('infoRow').textContent =
+    'Tap the beat of the video to set native BPM, then pick a target BPM above.\nVideo playback rate = Target ÷ Native.';
+  document.querySelectorAll('.video-item').forEach(el => el.classList.remove('active'));
+  if (itemEl) itemEl.classList.add('active');
+  ['cropSvg','fsCropSvg'].forEach(id => document.getElementById(id).classList.remove('vis'));
+  vid.src = src;
+  vid.load();
+  applyVideoTransform();
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// VIDEO LOAD — adapt wrap aspect ratio
+// ═══════════════════════════════════════════════════════════════════
 vid.addEventListener('loadedmetadata', () => {
+  DURATION = vid.duration || DURATION;
+  loopA = 0; loopB = DURATION;
   updateTimeline();
   applyBPM();
-});
-setTarget(120);
-updateTimeline();
 
-// Flash BPM display on beat (when playing)
+  const vW = vid.videoWidth;
+  const vH = vid.videoHeight;
+  const wrap = document.getElementById('videoWrap');
+
+  if (vW && vH) {
+    const ar = vW / vH;
+    const appW = Math.min(document.querySelector('.app').clientWidth || 680, 680);
+    if (ar < 1) {
+      // Portrait — fix height, width follows
+      const h = Math.min(480, appW / ar);
+      wrap.style.height   = h + 'px';
+      wrap.style.maxHeight = h + 'px';
+      wrap.style.width    = (h * ar) + 'px';
+    } else {
+      // Landscape / square
+      const h = Math.min(360, appW / ar);
+      wrap.style.height   = h + 'px';
+      wrap.style.maxHeight = h + 'px';
+      wrap.style.width    = '100%';
+    }
+  }
+
+  applyVideoTransform();
+  vid.play().catch(() => {});
+  syncPlayBtns();
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// ZOOM & CROP TRANSFORM
+// ═══════════════════════════════════════════════════════════════════
+function getRenderedBounds(wrapEl) {
+  const wW = wrapEl.clientWidth, wH = wrapEl.clientHeight;
+  const vW = vid.videoWidth  || 9, vH = vid.videoHeight || 16;
+  const wAR = wW / wH, vAR = vW / vH;
+  let rendW, rendH;
+  if (vAR > wAR) { rendW = wW; rendH = wW / vAR; }
+  else           { rendH = wH; rendW = wH * vAR; }
+  return { offX:(wW-rendW)/2, offY:(wH-rendH)/2, rendW, rendH, wW, wH };
+}
+
+function applyVideoTransform() {
+  const wrapId = isFS ? 'fsVideoWrap' : 'videoWrap';
+  const wrap   = document.getElementById(wrapId);
+  const { offX, offY, rendW, rendH, wW, wH } = getRenderedBounds(wrap);
+  if (!rendW || !rendH) return;
+
+  const cxPx = crop.x * rendW, cyPx = crop.y * rendH;
+  const cwPx = crop.w * rendW, chPx = crop.h * rendH;
+  const baseScale = Math.min(wW / cwPx, wH / chPx);
+  const scale = baseScale * zoomLevel;
+  const cropCX = offX + cxPx + cwPx / 2;
+  const cropCY = offY + cyPx + chPx / 2;
+  const tx = wW / 2 - cropCX * scale;
+  const ty = wH / 2 - cropCY * scale;
+
+  vid.style.transformOrigin = 'top left';
+  vid.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+
+  const zpct = Math.round(zoomLevel * 100);
+  document.getElementById('zoomVal').textContent   = zpct + '%';
+  document.getElementById('fsZoomVal').textContent  = zpct + '%';
+
+  drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH);
+}
+
+function drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH) {
+  const svgId = wrapId === 'fsVideoWrap' ? 'fsCropSvg' : 'cropSvg';
+  const svg   = document.getElementById(svgId);
+  if (!hasCrop) { svg.classList.remove('vis'); return; }
+
+  const ax = offX + crop.x * rendW,        ay = offY + crop.y * rendH;
+  const bx = offX + (crop.x+crop.w)*rendW, by = offY + (crop.y+crop.h)*rendH;
+  const nx1 = ax/wW, ny1 = ay/wH;
+  const nw  = (bx-ax)/wW, nh = (by-ay)/wH;
+  const cs  = 0.013;
+
+  svg.setAttribute('viewBox', '0 0 1 1');
+  svg.innerHTML = `
+    <defs>
+      <mask id="cm${svgId}">
+        <rect x="0" y="0" width="1" height="1" fill="white"/>
+        <rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}" fill="black"/>
+      </mask>
+    </defs>
+    <rect x="0" y="0" width="1" height="1" fill="rgba(0,0,0,0.5)" mask="url(#cm${svgId})"/>
+    <rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}"
+          fill="none" stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>
+    <rect x="${nx1-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+    <rect x="${nx1+nw-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+    <rect x="${nx1-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+    <rect x="${nx1+nw-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+  `;
+  svg.classList.add('vis');
+}
+
+// ── Crop draw (rubber-band preview on canvas, only commit on mouseup) ──
+function screenToNorm(clientX, clientY) {
+  const wrapId = isFS ? 'fsVideoWrap' : 'videoWrap';
+  const wrap   = document.getElementById(wrapId);
+  const rect   = wrap.getBoundingClientRect();
+  const { offX, offY, rendW, rendH } = getRenderedBounds(wrap);
+  return {
+    nx: (clientX - rect.left - offX) / rendW,
+    ny: (clientY - rect.top  - offY) / rendH
+  };
+}
+
+function drawRubberBand(canvas, x0, y0, x1, y1) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const rx = Math.min(x0,x1), ry = Math.min(y0,y1);
+  const rw = Math.abs(x1-x0), rh = Math.abs(y1-y0);
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(rx, ry, rw, rh);
+  ctx.strokeStyle = '#ffb800';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6,4]);
+  ctx.strokeRect(rx, ry, rw, rh);
+  // Corner squares
+  const cs = 6;
+  ctx.fillStyle = '#ffb800';
+  ctx.setLineDash([]);
+  [[rx,ry],[rx+rw,ry],[rx,ry+rh],[rx+rw,ry+rh]].forEach(([cx,cy]) =>
+    ctx.fillRect(cx-cs/2, cy-cs/2, cs, cs)
+  );
+}
+
+function setupCropDraw(canvasId) {
+  const canvas = document.getElementById(canvasId);
+
+  function onDown(clientX, clientY) {
+    if (!cropDrawMode) return false;
+    cropDrawing = true;
+    const rect = canvas.getBoundingClientRect();
+    cropDragPx   = { x0: clientX - rect.left, y0: clientY - rect.top };
+    cropDragNorm = screenToNorm(clientX, clientY);
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    return true;
+  }
+  function onMove(clientX, clientY) {
+    if (!cropDrawing) return;
+    const rect = canvas.getBoundingClientRect();
+    const px1 = clientX - rect.left, py1 = clientY - rect.top;
+    drawRubberBand(canvas, cropDragPx.x0, cropDragPx.y0, px1, py1);
+  }
+  function onUp(clientX, clientY) {
+    if (!cropDrawing) return;
+    cropDrawing = false;
+    const end = screenToNorm(clientX, clientY);
+    const x = Math.min(cropDragNorm.nx, end.nx);
+    const y = Math.min(cropDragNorm.ny, end.ny);
+    const w = Math.abs(end.nx - cropDragNorm.nx);
+    const h = Math.abs(end.ny - cropDragNorm.ny);
+    if (w > 0.02 && h > 0.02) {
+      crop = { x, y, w, h }; hasCrop = true;
+    }
+    exitCropMode();
+    applyVideoTransform();
+  }
+
+  canvas.addEventListener('mousedown', e => { e.preventDefault(); onDown(e.clientX, e.clientY); });
+  canvas.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+  canvas.addEventListener('mouseup',   e => onUp(e.clientX, e.clientY));
+  canvas.addEventListener('mouseleave', e => {
+    // If mouse leaves canvas, commit what we have
+    if (cropDrawing) onUp(e.clientX, e.clientY);
+  });
+
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    onDown(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:false});
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    onMove(e.touches[0].clientX, e.touches[0].clientY);
+  }, {passive:false});
+  canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    if (e.changedTouches.length)
+      onUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+  }, {passive:false});
+}
+setupCropDraw('cropCanvas');
+setupCropDraw('fsCropCanvas');
+
+function enterCropMode() {
+  cropDrawMode = true;
+  const canvasId = isFS ? 'fsCropCanvas' : 'cropCanvas';
+  const wrapId   = isFS ? 'fsVideoWrap'  : 'videoWrap';
+  const canvas   = document.getElementById(canvasId);
+  const wrap     = document.getElementById(wrapId);
+  canvas.width  = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  Object.assign(canvas.style, {
+    position:'absolute', inset:'0',
+    width: wrap.clientWidth  + 'px',
+    height: wrap.clientHeight + 'px',
+    display: 'block',
+    cursor: 'crosshair',
+    zIndex: '25'
+  });
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+function exitCropMode() {
+  cropDrawMode = false; cropDrawing = false;
+  document.getElementById('cropCanvas').style.display   = 'none';
+  document.getElementById('fsCropCanvas').style.display = 'none';
+  document.getElementById('cropToggleBtn').classList.remove('active');
+  document.getElementById('fsCropBtn').classList.remove('y');
+}
+
+document.getElementById('cropToggleBtn').addEventListener('click', () => {
+  if (cropDrawMode) { exitCropMode(); return; }
+  document.getElementById('cropToggleBtn').classList.add('active');
+  enterCropMode();
+});
+document.getElementById('fsCropBtn').addEventListener('click', () => {
+  if (cropDrawMode) { exitCropMode(); return; }
+  document.getElementById('fsCropBtn').classList.add('y');
+  enterCropMode();
+});
+
+function resetCrop() {
+  crop = { x:0, y:0, w:1, h:1 }; hasCrop = false; zoomLevel = 1;
+  exitCropMode();
+  document.getElementById('cropSvg').classList.remove('vis');
+  document.getElementById('fsCropSvg').classList.remove('vis');
+  applyVideoTransform();
+}
+document.getElementById('cropResetBtn').addEventListener('click', resetCrop);
+document.getElementById('fsCropResetBtn').addEventListener('click', resetCrop);
+
+// ── Zoom ──
+function adjustZoom(delta) {
+  zoomLevel = Math.max(0.1, Math.min(10, zoomLevel + delta));
+  applyVideoTransform();
+}
+document.getElementById('zoomIn').addEventListener('click',     () => adjustZoom(0.1));
+document.getElementById('zoomOut').addEventListener('click',    () => adjustZoom(-0.1));
+document.getElementById('fsZoomInBtn').addEventListener('click', () => adjustZoom(0.1));
+document.getElementById('fsZoomOutBtn').addEventListener('click',() => adjustZoom(-0.1));
+
+['videoWrap','fsVideoWrap'].forEach(id =>
+  document.getElementById(id).addEventListener('wheel', e => {
+    if (e.ctrlKey || e.metaKey || isFS) {
+      e.preventDefault();
+      adjustZoom(e.deltaY < 0 ? 0.05 : -0.05);
+    }
+  }, {passive:false})
+);
+
+// ═══════════════════════════════════════════════════════════════════
+// FULLSCREEN
+// ═══════════════════════════════════════════════════════════════════
+const fsOverlay  = document.getElementById('fsOverlay');
+const fsVidWrap  = document.getElementById('fsVideoWrap');
+const vidWrap    = document.getElementById('videoWrap');
+
+function enterFS() {
+  isFS = true;
+  fsOverlay.classList.add('active');
+  fsVidWrap.insertBefore(vid, document.getElementById('fsCropCanvas'));
+  vid.style.maxWidth  = '100%'; vid.style.maxHeight = '100%';
+  barPinned = false; showBar(true);
+  if (fsOverlay.requestFullscreen) fsOverlay.requestFullscreen().catch(()=>{});
+  requestAnimationFrame(() => { applyVideoTransform(); updateTimeline(); });
+}
+function exitFS() {
+  isFS = false;
+  fsOverlay.classList.remove('active');
+  vidWrap.insertBefore(vid, document.getElementById('cropCanvas'));
+  vid.style.maxWidth = ''; vid.style.maxHeight = '';
+  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+  requestAnimationFrame(() => { applyVideoTransform(); updateTimeline(); });
+}
+
+document.getElementById('fsEnterBtn').addEventListener('click', enterFS);
+document.getElementById('fsExitBtn').addEventListener('click',  exitFS);
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && isFS) exitFS();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && isFS) exitFS();
+  if (e.key === ' ' && isFS) { e.preventDefault(); vid.paused ? vid.play() : vid.pause(); }
+  if (e.key === 'ArrowRight') vid.currentTime = Math.min(vid.duration||DURATION, vid.currentTime + 0.5);
+  if (e.key === 'ArrowLeft')  vid.currentTime = Math.max(0, vid.currentTime - 0.5);
+});
+
+// ── Bar auto-hide ──
+const fsBar      = document.getElementById('fsBar');
+const fsHideHint = document.getElementById('fsHideHint');
+
+function showBar(reschedule) {
+  if (barPinned) return;
+  barVisible = true;
+  fsBar.classList.remove('hidden');
+  fsHideHint.classList.remove('vis');
+  if (reschedule) scheduleHide();
+}
+function hideBar() {
+  barVisible = false;
+  fsBar.classList.add('hidden');
+  fsHideHint.classList.add('vis');
+}
+function scheduleHide() {
+  clearTimeout(barHideTimer);
+  barHideTimer = setTimeout(() => { if (!barPinned) hideBar(); }, 3200);
+}
+
+fsOverlay.addEventListener('mousemove', () => { if (isFS && !barPinned) showBar(true); });
+fsOverlay.addEventListener('click', e => {
+  if (!isFS || e.target.closest('#fsBar') || cropDrawMode) return;
+  if (barPinned || !barVisible) { barPinned = false; showBar(true); }
+});
+document.getElementById('fsHideBarBtn').addEventListener('click', () => {
+  barPinned = !barPinned;
+  barPinned ? (clearTimeout(barHideTimer), hideBar()) : showBar(true);
+});
+fsBar.addEventListener('mouseenter', () => clearTimeout(barHideTimer));
+fsBar.addEventListener('mouseleave', scheduleHide);
+
+// ═══════════════════════════════════════════════════════════════════
+// BEAT FLASH
+// ═══════════════════════════════════════════════════════════════════
 let beatInterval = null;
-function restartBeatFlash() {
-  if (beatInterval) clearInterval(beatInterval);
+function startBeatFlash() {
+  clearInterval(beatInterval);
   if (!vid.paused && nativeBPM) {
-    const interval = 60000 / targetBPM;
     beatInterval = setInterval(() => {
-      const d = document.getElementById('bpmDisplay');
-      d.classList.add('flash');
-      setTimeout(() => d.classList.remove('flash'), 80);
-    }, interval);
+      ['bpmDisplay','fsBpmDisplay'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('flash');
+        setTimeout(() => el.classList.remove('flash'), 80);
+      });
+    }, 60000 / targetBPM);
   }
 }
-vid.addEventListener('play', restartBeatFlash);
-vid.addEventListener('pause', () => { if (beatInterval) clearInterval(beatInterval); });
+vid.addEventListener('play',  startBeatFlash);
+vid.addEventListener('pause', () => clearInterval(beatInterval));
+
+// ═══════════════════════════════════════════════════════════════════
+// RESIZE
+// ═══════════════════════════════════════════════════════════════════
+new ResizeObserver(() => { applyVideoTransform(); updateTimeline(); })
+  .observe(document.getElementById('videoWrap'));
+new ResizeObserver(() => { if (isFS) { applyVideoTransform(); updateTimeline(); } })
+  .observe(document.getElementById('fsVideoWrap'));
+
+// ═══════════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════════
+loadVideoList();
+setTarget(120);
+updateTimeline();
+applyVideoTransform();
+vid.load();
 </script>
 </body>
 </html>
