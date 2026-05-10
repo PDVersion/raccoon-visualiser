@@ -18,44 +18,67 @@
   <button id="themeToggle" title="Toggle theme">☀ LIGHT</button>
 </div>
 
-<div class="app">
+<main class="workspace">
 
-  <!-- VIDEO -->
-  <div class="video-outer">
-    <div class="video-wrap" id="videoWrap">
-      <video id="vid" playsinline loop muted></video>
-      <canvas class="crop-canvas" id="cropCanvas"></canvas>
-      <svg class="crop-svg" id="cropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
-      <button class="fs-btn" id="fsEnterBtn" title="Fullscreen">⛶</button>
+  <!-- LEFT TRACK — drag panels here -->
+  <aside class="track" id="trackLeft" data-side="left"></aside>
+
+  <!-- CENTER STAGE — video + zoom row -->
+  <section class="stage-col">
+    <div class="video-stage" id="videoStage">
+      <div class="video-wrap" id="videoWrap" data-mode="video">
+        <video id="vid" playsinline loop muted></video>
+        <img id="vidImg" alt="" hidden>
+        <canvas class="crop-canvas" id="cropCanvas"></canvas>
+        <svg class="crop-svg" id="cropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+        <button class="fs-btn" id="fsEnterBtn" title="Fullscreen">⛶</button>
+      </div>
     </div>
-  </div>
 
-  <!-- ZOOM / CROP ROW — centered -->
-  <div class="zoom-row">
-    <span>ZOOM</span>
-    <button class="zoom-btn" id="zoomOut">−</button>
-    <span class="zoom-val" id="zoomVal">100%</span>
-    <button class="zoom-btn" id="zoomIn">+</button>
-    <button class="crop-toggle-btn" id="cropToggleBtn">✂ SET CROP</button>
-    <button class="crop-reset-btn" id="cropResetBtn">✕ RESET</button>
-  </div>
+    <!-- ZOOM / CROP ROW — centered under stage -->
+    <div class="zoom-row">
+      <span>ZOOM</span>
+      <button class="zoom-btn" id="zoomOut">−</button>
+      <span class="zoom-val" id="zoomVal">100%</span>
+      <button class="zoom-btn" id="zoomIn">+</button>
+      <button class="crop-toggle-btn" id="cropToggleBtn">✂ SET CROP</button>
+      <button class="crop-reset-btn" id="cropResetBtn">✕ RESET</button>
+    </div>
+  </section>
+
+  <!-- RIGHT TRACK — drag panels here -->
+  <aside class="track" id="trackRight" data-side="right"></aside>
+
+</main>
+
+<!-- PANEL POOL — panels live here at startup, then JS distributes them across tracks -->
+<div id="panelPool" hidden>
 
   <!-- VIDEO LIBRARY PANEL -->
-  <div class="panel">
-    <div class="panel-label">Video Library — videos/ folder</div>
-    <div class="video-list" id="videoList">
-      <div class="no-videos">Loading…</div>
+  <div class="panel" data-panel-id="library">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">Video Library — videos/ folder</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
     </div>
-    <div class="info-row">
-      Place video files in the <code>videos/</code> folder and list them in
-      <code>videos/manifest.json</code> as an array of filenames,
-      e.g. <code>["clip1.mp4","clip2.mp4"]</code>.
+    <div class="panel-body">
+      <div class="video-list" id="videoList">
+        <div class="no-videos">Loading…</div>
+      </div>
+      <div class="info-row">
+        Place video, GIF, or WebP files in the <code>videos/</code> folder and list them in
+        <code>videos/manifest.json</code> as an array of filenames,
+        e.g. <code>["clip1.mp4","loop.gif","anim.webp"]</code>.
+      </div>
     </div>
   </div>
 
   <!-- EFFECTS PANEL -->
-  <div class="panel effects-panel">
-    <div class="panel-label">Effects</div>
+  <div class="panel effects-panel" data-panel-id="effects">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">Effects</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
+    </div>
+    <div class="panel-body">
 
     <div class="shape-picker">
       <span>Crop shape:</span>
@@ -87,15 +110,28 @@
         <span id="bounceSpeedVal">180 px/s</span>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- BPM DISPLAY -->
-  <div class="bpm-readout" id="bpmDisplay">120.0</div>
-  <div class="bpm-unit">BPM</div>
+  <div class="panel bpm-display-panel" data-panel-id="bpm-display">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">BPM Display</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
+    </div>
+    <div class="panel-body">
+      <div class="bpm-readout" id="bpmDisplay">120.0</div>
+      <div class="bpm-unit">BPM</div>
+    </div>
+  </div>
 
   <!-- MAIN BPM PANEL -->
-  <div class="panel">
-    <div class="panel-label">Target BPM</div>
+  <div class="panel" data-panel-id="bpm" data-needs="video">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">Target BPM</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
+    </div>
+    <div class="panel-body">
     <div class="bpm-row">
       <div class="slider-wrap">
         <input type="range" id="bpmSlider" min="40" max="220" step="0.1" value="120">
@@ -131,11 +167,16 @@
       <button class="loop-toggle" id="loopToggle">⟳ LOOP REGION</button>
       <button class="btn" id="resetBtn">Reset Loop</button>
     </div>
+    </div>
   </div>
 
   <!-- LOOP EDITOR PANEL -->
-  <div class="panel">
-    <div class="panel-label">Loop Region — drag handles or use Set A/B buttons</div>
+  <div class="panel" data-panel-id="loop" data-needs="video">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">Loop Region — drag handles or use Set A/B buttons</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
+    </div>
+    <div class="panel-body">
     <div class="timeline-wrap" id="timeline">
       <div class="timeline-track"></div>
       <div class="timeline-region" id="region"></div>
@@ -156,6 +197,7 @@
     <div class="info-row">
       Drag the orange (A) and yellow (B) handles to define the loop region.<br>
       Aim for a point where the raccoon is at the same phase of the bounce — this hides the cut.
+    </div>
     </div>
   </div>
 
@@ -197,8 +239,20 @@
 // ═══════════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════════
-const vid = document.getElementById('vid');
+const vid    = document.getElementById('vid');
+const vidImg = document.getElementById('vidImg');
 let DURATION = 17.016667;
+let mediaMode = 'video';   // 'video' | 'image'
+
+const IMAGE_EXTS = ['gif', 'webp', 'apng', 'png', 'jpg', 'jpeg'];
+function extOf(name) { const m = /\.([^.]+)$/.exec(name); return m ? m[1].toLowerCase() : ''; }
+function isImageMedia(name) { return IMAGE_EXTS.includes(extOf(name)); }
+function getActiveMedia() { return mediaMode === 'image' ? vidImg : vid; }
+function getActiveSize() {
+  return mediaMode === 'image'
+    ? { w: vidImg.naturalWidth || 1, h: vidImg.naturalHeight || 1 }
+    : { w: vid.videoWidth || 9, h: vid.videoHeight || 16 };
+}
 
 let nativeBPM  = null;
 let targetBPM  = 120;
@@ -467,22 +521,28 @@ function buildVideoItem(filename, isActive) {
   const item = document.createElement('div');
   item.className = 'video-item' + (isActive ? ' active' : '');
   const name = filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  const isImg = isImageMedia(filename);
+  const icon = isImg ? '◉' : '▶';
+  const tag = isImg ? `<span class="video-item-tag">${extOf(filename).toUpperCase()}</span>` : '';
   item.innerHTML = `
-    <span class="video-item-icon">▶</span>
+    <span class="video-item-icon">${icon}</span>
     <span class="video-item-name" title="${filename}">${name}</span>
+    ${tag}
     <span class="video-item-dur" id="vdur-${encodeURIComponent(filename)}"></span>
   `;
   item.addEventListener('click', () => loadVideo('videos/' + filename, item));
 
-  // Probe duration in background
-  const probe = document.createElement('video');
-  probe.preload = 'metadata';
-  probe.src = 'videos/' + filename;
-  probe.addEventListener('loadedmetadata', () => {
-    const el = document.getElementById('vdur-' + encodeURIComponent(filename));
-    if (el) el.textContent = fmtDur(probe.duration);
-    probe.src = '';
-  });
+  // Probe duration in background — videos only.
+  if (!isImg) {
+    const probe = document.createElement('video');
+    probe.preload = 'metadata';
+    probe.src = 'videos/' + filename;
+    probe.addEventListener('loadedmetadata', () => {
+      const el = document.getElementById('vdur-' + encodeURIComponent(filename));
+      if (el) el.textContent = fmtDur(probe.duration);
+      probe.src = '';
+    });
+  }
 
   return item;
 }
@@ -526,51 +586,87 @@ function loadVideo(src, itemEl) {
   cropPath = null;
   loopEnabled = false; syncLoopBtns();
   nativeBPM = null;
-  document.getElementById('nativeDisplay').textContent = '--';
-  document.getElementById('infoRow').textContent =
+  const nd = document.getElementById('nativeDisplay');  if (nd) nd.textContent = '--';
+  const ir = document.getElementById('infoRow');
+  if (ir) ir.textContent =
     'Tap the beat of the video to set native BPM, then pick a target BPM above.\nVideo playback rate = Target ÷ Native.';
   document.querySelectorAll('.video-item').forEach(el => el.classList.remove('active'));
   if (itemEl) itemEl.classList.add('active');
   ['cropSvg','fsCropSvg'].forEach(id => document.getElementById(id).classList.remove('vis'));
-  vid.src = src;
-  vid.load();
+
+  const filename = src.split('/').pop();
+  const wantImage = isImageMedia(filename);
+
+  if (wantImage) {
+    // Stop any video playback and switch to image mode
+    try { vid.pause(); } catch (_) {}
+    vid.removeAttribute('src');
+    vid.load();
+    mediaMode = 'image';
+    document.getElementById('videoWrap').dataset.mode = 'image';
+    vid.hidden = true;
+    vidImg.hidden = false;
+    vidImg.style.transform = '';
+    vidImg.src = src;
+  } else {
+    mediaMode = 'video';
+    document.getElementById('videoWrap').dataset.mode = 'video';
+    vidImg.hidden = true;
+    vid.hidden = false;
+    vidImg.removeAttribute('src');
+    vid.src = src;
+    vid.load();
+  }
+  updatePanelVisibilityForMode();
   applyVideoTransform();
 }
 
+function updatePanelVisibilityForMode() {
+  const isImage = mediaMode === 'image';
+  document.querySelectorAll('[data-needs="video"]').forEach(el => {
+    el.classList.toggle('hidden-by-mode', isImage);
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════════
-// VIDEO LOAD — adapt wrap aspect ratio
+// MEDIA LOAD — adapt wrap aspect ratio (shared video + image)
 // ═══════════════════════════════════════════════════════════════════
-vid.addEventListener('loadedmetadata', () => {
-  DURATION = vid.duration || DURATION;
-  loopA = 0; loopB = DURATION;
-  updateTimeline();
+function onMediaReady(natW, natH) {
+  if (mediaMode === 'video') {
+    DURATION = vid.duration || DURATION;
+    loopA = 0; loopB = DURATION;
+    updateTimeline();
+  }
   applyBPM();
 
-  const vW = vid.videoWidth;
-  const vH = vid.videoHeight;
   const wrap = document.getElementById('videoWrap');
-
-  if (vW && vH) {
-    const ar = vW / vH;
-    const appW = Math.min(document.querySelector('.app').clientWidth || 680, 680);
-    if (ar < 1) {
-      // Portrait — fix height, width follows
-      const h = Math.min(480, appW / ar);
-      wrap.style.height   = h + 'px';
-      wrap.style.maxHeight = h + 'px';
-      wrap.style.width    = (h * ar) + 'px';
-    } else {
-      // Landscape / square
-      const h = Math.min(360, appW / ar);
-      wrap.style.height   = h + 'px';
-      wrap.style.maxHeight = h + 'px';
-      wrap.style.width    = '100%';
-    }
+  const stage = document.getElementById('videoStage');
+  if (natW && natH && stage) {
+    const ar = natW / natH;
+    // Available stage area (account for stage padding/border by using clientRects).
+    const stageW = stage.clientWidth || 480;
+    const stageH = stage.clientHeight || 360;
+    let w = stageW, h = stageW / ar;
+    if (h > stageH) { h = stageH; w = stageH * ar; }
+    wrap.style.width = w + 'px';
+    wrap.style.height = h + 'px';
   }
 
   applyVideoTransform();
-  vid.play().catch(() => {});
-  syncPlayBtns();
+  if (mediaMode === 'video') {
+    vid.play().catch(() => {});
+    syncPlayBtns();
+  }
+}
+
+vid.addEventListener('loadedmetadata', () => {
+  if (mediaMode !== 'video') return;
+  onMediaReady(vid.videoWidth, vid.videoHeight);
+});
+
+vidImg.addEventListener('load', () => {
+  if (mediaMode !== 'image') return;
+  onMediaReady(vidImg.naturalWidth, vidImg.naturalHeight);
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -578,7 +674,8 @@ vid.addEventListener('loadedmetadata', () => {
 // ═══════════════════════════════════════════════════════════════════
 function getRenderedBounds(wrapEl) {
   const wW = wrapEl.clientWidth, wH = wrapEl.clientHeight;
-  const vW = vid.videoWidth  || 9, vH = vid.videoHeight || 16;
+  const sz = getActiveSize();
+  const vW = sz.w, vH = sz.h;
   const wAR = wW / wH, vAR = vW / vH;
   let rendW, rendH;
   if (vAR > wAR) { rendW = wW; rendH = wW / vAR; }
@@ -601,43 +698,58 @@ function applyVideoTransform() {
   const tx = wW / 2 - cropCX * scale;
   const ty = wH / 2 - cropCY * scale;
 
-  vid.style.transformOrigin = 'top left';
-  vid.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  // Apply transform to the active media element only; clear the inactive one.
+  const active = getActiveMedia();
+  active.style.transformOrigin = 'top left';
+  active.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+  const inactive = active === vid ? vidImg : vid;
+  inactive.style.transform = '';
 
   const zpct = Math.round(zoomLevel * 100);
   document.getElementById('zoomVal').textContent   = zpct + '%';
   document.getElementById('fsZoomVal').textContent  = zpct + '%';
 
-  drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH);
+  drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH, tx, ty, scale);
 }
 
-function drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH) {
+function drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH, tx, ty, scale) {
   const svgId = wrapId === 'fsVideoWrap' ? 'fsCropSvg' : 'cropSvg';
   const svg   = document.getElementById(svgId);
   if (!hasCrop) { svg.classList.remove('vis'); return; }
 
-  const ax = offX + crop.x * rendW,        ay = offY + crop.y * rendH;
-  const nx1 = ax/wW, ny1 = ay/wH;
-  const nw  = (crop.w * rendW)/wW, nh = (crop.h * rendH)/wH;
-  const cs  = 0.013;
+  // Project a point that lives in the wrap's pre-transform coordinate space
+  // through the same translate+scale that's applied to the media element,
+  // and normalize to the wrap's [0..1] viewBox. This is what makes the
+  // crop overlay align with the now-zoomed-in media after applyVideoTransform.
+  const proj = (px, py) => ({
+    x: (px * scale + tx) / wW,
+    y: (py * scale + ty) / wH
+  });
+  const projR = (px, py) => ({ w: (px * scale) / wW, h: (py * scale) / wH });
 
-  // Outside-fill: solid colour if user picked one, else 50% black darken.
+  const cs = 0.013;
   const outsideFill = cropBgColor || 'rgba(0,0,0,0.5)';
 
   let cutoutShape;
   let borderShape = '';
   if (cropShape === 'circle') {
-    const cxN = nx1 + nw/2, cyN = ny1 + nh/2, rN = Math.min(nw, nh)/2;
-    cutoutShape = `<circle cx="${cxN}" cy="${cyN}" r="${rN}" fill="black"/>`;
+    const cxPx = offX + crop.x * rendW + (crop.w * rendW) / 2;
+    const cyPx = offY + crop.y * rendH + (crop.h * rendH) / 2;
+    const c = proj(cxPx, cyPx);
+    // Use the smaller of the two scaled radii so the circle stays a circle
+    // even when the wrap's aspect ratio differs from the media's.
+    const rN = Math.min(crop.w * rendW, crop.h * rendH) / 2 * scale / Math.min(wW, wH);
+    cutoutShape = `<circle cx="${c.x}" cy="${c.y}" r="${rN}" fill="black"/>`;
     if (!cropBgColor) {
-      borderShape = `<circle cx="${cxN}" cy="${cyN}" r="${rN}"
+      borderShape = `<circle cx="${c.x}" cy="${c.y}" r="${rN}"
         fill="none" stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>`;
     }
   } else if (cropShape === 'freeform' && cropPath && cropPath.length > 2) {
     const pts = cropPath.map(p => {
-      const px = (offX + p.nx * rendW)/wW;
-      const py = (offY + p.ny * rendH)/wH;
-      return `${px.toFixed(4)},${py.toFixed(4)}`;
+      const px = offX + p.nx * rendW;
+      const py = offY + p.ny * rendH;
+      const pp = proj(px, py);
+      return `${pp.x.toFixed(4)},${pp.y.toFixed(4)}`;
     }).join(' ');
     cutoutShape = `<polygon points="${pts}" fill="black"/>`;
     if (!cropBgColor) {
@@ -645,6 +757,9 @@ function drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH) {
         stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>`;
     }
   } else { // rect
+    const a = proj(offX + crop.x * rendW, offY + crop.y * rendH);
+    const r = projR(crop.w * rendW, crop.h * rendH);
+    const nx1 = a.x, ny1 = a.y, nw = r.w, nh = r.h;
     cutoutShape = `<rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}" fill="black"/>`;
     if (!cropBgColor) {
       borderShape = `
@@ -934,23 +1049,38 @@ const fsVidWrap  = document.getElementById('fsVideoWrap');
 const vidWrap    = document.getElementById('videoWrap');
 
 function enterFS() {
-  if (bounceOn && typeof stopBounce === 'function') stopBounce();
   isFS = true;
   fsOverlay.classList.add('active');
-  fsVidWrap.insertBefore(vid, document.getElementById('fsCropCanvas'));
+  // Move BOTH the video and image elements so either media kind works in FS.
+  fsVidWrap.insertBefore(vid,    document.getElementById('fsCropCanvas'));
+  fsVidWrap.insertBefore(vidImg, document.getElementById('fsCropCanvas'));
   vid.style.maxWidth  = '100%'; vid.style.maxHeight = '100%';
+  vidImg.style.maxWidth = '100%'; vidImg.style.maxHeight = '100%';
+  // Clear any stale bounce transform on the wrap since we now move the media.
+  document.getElementById('videoWrap').style.transform = '';
   barPinned = false; showBar(true);
   if (fsOverlay.requestFullscreen) fsOverlay.requestFullscreen().catch(()=>{});
-  requestAnimationFrame(() => { applyVideoTransform(); updateTimeline(); });
+  requestAnimationFrame(() => {
+    applyVideoTransform();
+    updateTimeline();
+    if (bounceOn) reseedBounceForArea();
+  });
 }
 function exitFS() {
-  if (bounceOn && typeof stopBounce === 'function') stopBounce();
   isFS = false;
   fsOverlay.classList.remove('active');
-  vidWrap.insertBefore(vid, document.getElementById('cropCanvas'));
+  vidWrap.insertBefore(vid,    document.getElementById('cropCanvas'));
+  vidWrap.insertBefore(vidImg, document.getElementById('cropCanvas'));
   vid.style.maxWidth = ''; vid.style.maxHeight = '';
+  vidImg.style.maxWidth = ''; vidImg.style.maxHeight = '';
+  // Clear any FS bounce transform from the media before we switch modes.
+  document.getElementById('fsVideoWrap').style.transform = '';
   if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
-  requestAnimationFrame(() => { applyVideoTransform(); updateTimeline(); });
+  requestAnimationFrame(() => {
+    applyVideoTransform();
+    updateTimeline();
+    if (bounceOn) reseedBounceForArea();
+  });
 }
 
 document.getElementById('fsEnterBtn').addEventListener('click', enterFS);
@@ -1025,6 +1155,15 @@ new ResizeObserver(() => { applyVideoTransform(); updateTimeline(); })
 new ResizeObserver(() => { if (isFS) { applyVideoTransform(); updateTimeline(); } })
   .observe(document.getElementById('fsVideoWrap'));
 
+// Window resize: refit the video wrap to the new stage column size and
+// rescale bounce position into the new arena.
+window.addEventListener('resize', () => {
+  if (isFS) return;
+  const sz = getActiveSize();
+  if (sz.w && sz.h) onMediaReady(sz.w, sz.h);
+  if (bounceOn) reseedBounceForArea();
+});
+
 // ═══════════════════════════════════════════════════════════════════
 // THEME TOGGLE
 // ═══════════════════════════════════════════════════════════════════
@@ -1073,10 +1212,56 @@ document.querySelectorAll('#colorPalette .color-swatch').forEach(sw => {
 });
 
 // ── Bounce ──
+// In normal mode: the .video-wrap (sized to media aspect) is moved around
+// inside the larger .video-stage container. In fullscreen: fsVideoWrap acts
+// as both wrap and stage — the moving element is `vid` (or `vidImg`) itself,
+// constrained by the window.
+
+function getBounceTargets() {
+  if (isFS) {
+    // Move the active media element inside the fullscreen wrap.
+    const stage = document.getElementById('fsVideoWrap');
+    const mover = getActiveMedia();
+    return { stage, mover, useMediaTransform: true };
+  }
+  const stage = document.getElementById('videoStage');
+  const mover = document.getElementById('videoWrap');
+  return { stage, mover, useMediaTransform: false };
+}
+
 function getBounceArea() {
-  if (isFS) return { w: window.innerWidth, h: window.innerHeight };
-  const w = document.getElementById('videoWrap');
-  return { w: w.clientWidth, h: w.clientHeight };
+  const { stage } = getBounceTargets();
+  return { w: stage.clientWidth, h: stage.clientHeight };
+}
+
+function applyBounceTransform() {
+  const { mover, useMediaTransform } = getBounceTargets();
+  if (useMediaTransform) {
+    // Compose with the existing crop/zoom transform (translate stays first
+    // since transformOrigin is top-left and translate happens after scale).
+    // Re-run applyVideoTransform with an extra offset baked in.
+    applyMediaTransformWithBounce(bounceX, bounceY);
+  } else {
+    mover.style.transform = `translate(${bounceX}px, ${bounceY}px)`;
+  }
+}
+
+// Variant of applyVideoTransform that adds a bounce offset to the media's
+// translate. Used in fullscreen mode where there is no separate wrap to move.
+function applyMediaTransformWithBounce(bx, by) {
+  const wrap = document.getElementById('fsVideoWrap');
+  const { offX, offY, rendW, rendH, wW, wH } = getRenderedBounds(wrap);
+  if (!rendW || !rendH) return;
+  const cwPx = crop.w * rendW, chPx = crop.h * rendH;
+  const baseScale = Math.min(wW / cwPx, wH / chPx);
+  const scale = baseScale * zoomLevel;
+  const cropCX = offX + crop.x * rendW + cwPx / 2;
+  const cropCY = offY + crop.y * rendH + chPx / 2;
+  const tx = wW / 2 - cropCX * scale + bx;
+  const ty = wH / 2 - cropCY * scale + by;
+  const active = getActiveMedia();
+  active.style.transformOrigin = 'top left';
+  active.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
 }
 
 function bounceTick(now) {
@@ -1084,9 +1269,24 @@ function bounceTick(now) {
   const dt = bounceLastT ? Math.min(0.05, (now - bounceLastT) / 1000) : 0;
   bounceLastT = now;
 
-  const wrap = document.getElementById(isFS ? 'fsVideoWrap' : 'videoWrap');
-  const { w, h } = getBounceArea();
-  const ww = wrap.clientWidth, wh = wrap.clientHeight;
+  const { stage, mover, useMediaTransform } = getBounceTargets();
+  const w = stage.clientWidth, h = stage.clientHeight;
+
+  let ww, wh;
+  if (useMediaTransform) {
+    // In fullscreen we move the media; the "moved size" approximates the
+    // visible cropped region which fills the wrap, so use stage size as both.
+    // We allow overflow off-screen freely — the box is the stage.
+    ww = mover.clientWidth || mover.naturalWidth || 0;
+    wh = mover.clientHeight || mover.naturalHeight || 0;
+    // Reduce by an arbitrary safety margin — clamping by the natural size
+    // doesn't reflect the post-scale render size, so just bound to stage.
+    ww = Math.min(ww, w);
+    wh = Math.min(wh, h);
+  } else {
+    ww = mover.clientWidth;
+    wh = mover.clientHeight;
+  }
 
   bounceX += bounceVX * dt;
   bounceY += bounceVY * dt;
@@ -1098,16 +1298,17 @@ function bounceTick(now) {
   if (bounceY < 0)    { bounceY = 0;    bounceVY = Math.abs(bounceVY); }
   if (bounceY > maxY) { bounceY = maxY; bounceVY = -Math.abs(bounceVY); }
 
-  wrap.style.transform = `translate(${bounceX}px, ${bounceY}px)`;
+  applyBounceTransform();
   bounceRAF = requestAnimationFrame(bounceTick);
 }
 
 function startBounce() {
   bounceOn = true;
-  const wrap = document.getElementById(isFS ? 'fsVideoWrap' : 'videoWrap');
-  const { w, h } = getBounceArea();
-  bounceX = Math.random() * Math.max(0, w - wrap.clientWidth);
-  bounceY = Math.random() * Math.max(0, h - wrap.clientHeight);
+  const { stage, mover } = getBounceTargets();
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const mw = mover.clientWidth || 0, mh = mover.clientHeight || 0;
+  bounceX = Math.random() * Math.max(0, w - mw);
+  bounceY = Math.random() * Math.max(0, h - mh);
   const angle = Math.random() * Math.PI * 2;
   bounceVX = Math.cos(angle) * bounceSpeedPx;
   bounceVY = Math.sin(angle) * bounceSpeedPx;
@@ -1122,11 +1323,32 @@ function stopBounce() {
   bounceOn = false;
   if (bounceRAF) cancelAnimationFrame(bounceRAF);
   bounceRAF = null;
+  bounceX = 0; bounceY = 0;
+  // Clear bounce-induced transforms on every possible mover.
   document.getElementById('videoWrap').style.transform = '';
   document.getElementById('fsVideoWrap').style.transform = '';
+  // Reapply pure crop/zoom transform so the media isn't left offset.
+  applyVideoTransform();
   const tb = document.getElementById('bounceToggle');
   tb.textContent = '↗ BOUNCE OFF';
   tb.classList.remove('active');
+}
+
+// Called when entering/exiting fullscreen while bounce is active so the
+// position is rescaled into the new arena instead of being abruptly clipped.
+function reseedBounceForArea() {
+  const { stage, mover } = getBounceTargets();
+  const w = stage.clientWidth, h = stage.clientHeight;
+  const mw = mover.clientWidth || 0, mh = mover.clientHeight || 0;
+  const maxX = Math.max(0, w - mw), maxY = Math.max(0, h - mh);
+  bounceX = Math.min(Math.max(0, bounceX), maxX);
+  bounceY = Math.min(Math.max(0, bounceY), maxY);
+  // If new area is degenerate, drop to corner so it doesn't get stuck.
+  if (maxX === 0) bounceX = 0;
+  if (maxY === 0) bounceY = 0;
+  // Clear stale wrapper transform left over from the other mode.
+  document.getElementById('videoWrap').style.transform = '';
+  document.getElementById('fsVideoWrap').style.transform = '';
 }
 
 document.getElementById('bounceToggle').addEventListener('click', () => {
@@ -1146,8 +1368,133 @@ document.getElementById('bounceToggle').addEventListener('click', () => {
 })();
 
 // ═══════════════════════════════════════════════════════════════════
+// PANEL LAYOUT — distribute panels across left/right tracks, with drag
+// reordering between tracks and collapsible panels. Persists to LS.
+// ═══════════════════════════════════════════════════════════════════
+const LAYOUT_KEY = 'raccoon.layout.v1';
+const DEFAULT_LAYOUT = {
+  left:  ['library', 'effects'],
+  right: ['bpm-display', 'bpm', 'loop'],
+  collapsed: []
+};
+
+function readLayout() {
+  try {
+    const raw = localStorage.getItem(LAYOUT_KEY);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (obj && Array.isArray(obj.left) && Array.isArray(obj.right)) return obj;
+  } catch (_) {}
+  return null;
+}
+function saveLayout() {
+  const left  = [...document.querySelectorAll('#trackLeft  > .panel')].map(p => p.dataset.panelId);
+  const right = [...document.querySelectorAll('#trackRight > .panel')].map(p => p.dataset.panelId);
+  const collapsed = [...document.querySelectorAll('.panel.collapsed')].map(p => p.dataset.panelId);
+  try { localStorage.setItem(LAYOUT_KEY, JSON.stringify({ left, right, collapsed })); }
+  catch (_) {}
+}
+
+function applyLayout(layout) {
+  const trackLeft  = document.getElementById('trackLeft');
+  const trackRight = document.getElementById('trackRight');
+  const pool       = document.getElementById('panelPool');
+  const known = new Set();
+
+  function moveById(id, track) {
+    const el = document.querySelector(`.panel[data-panel-id="${id}"]`);
+    if (!el) return;
+    track.appendChild(el);
+    known.add(id);
+  }
+  layout.left.forEach(id  => moveById(id, trackLeft));
+  layout.right.forEach(id => moveById(id, trackRight));
+
+  // Any panels not mentioned in the layout (e.g. new defaults added later)
+  // get appended to the right track so they're not orphaned in the pool.
+  document.querySelectorAll('#panelPool > .panel').forEach(p => {
+    if (!known.has(p.dataset.panelId)) trackRight.appendChild(p);
+  });
+
+  // Collapsed state
+  const collapsedSet = new Set(layout.collapsed || []);
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.toggle('collapsed', collapsedSet.has(p.dataset.panelId));
+  });
+}
+
+function setupPanelDrag() {
+  let dragId = null;
+
+  document.addEventListener('dragstart', e => {
+    const handle = e.target.closest('.panel-handle');
+    if (!handle) return;
+    const panel = handle.closest('.panel');
+    if (!panel) return;
+    dragId = panel.dataset.panelId;
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', dragId); } catch (_) {}
+    panel.classList.add('dragging');
+  });
+  document.addEventListener('dragend', () => {
+    document.querySelectorAll('.panel.dragging').forEach(p => p.classList.remove('dragging'));
+    document.querySelectorAll('.track.drop-target').forEach(t => t.classList.remove('drop-target'));
+    dragId = null;
+  });
+
+  document.querySelectorAll('.track').forEach(track => {
+    track.addEventListener('dragover', e => {
+      if (!dragId) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      track.classList.add('drop-target');
+    });
+    track.addEventListener('dragleave', e => {
+      if (e.target === track) track.classList.remove('drop-target');
+    });
+    track.addEventListener('drop', e => {
+      if (!dragId) return;
+      e.preventDefault();
+      track.classList.remove('drop-target');
+      const dragged = document.querySelector(`.panel[data-panel-id="${dragId}"]`);
+      if (!dragged) return;
+
+      // Insertion point: panel under the cursor's vertical position.
+      const after = [...track.querySelectorAll(':scope > .panel:not(.dragging)')]
+        .find(p => {
+          const r = p.getBoundingClientRect();
+          return e.clientY < r.top + r.height / 2;
+        });
+      if (after) track.insertBefore(dragged, after);
+      else track.appendChild(dragged);
+      saveLayout();
+    });
+  });
+}
+
+function setupPanelCollapse() {
+  document.querySelectorAll('.panel-collapse-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const panel = btn.closest('.panel');
+      if (!panel) return;
+      panel.classList.toggle('collapsed');
+      saveLayout();
+    });
+  });
+}
+
+function initPanelLayout() {
+  applyLayout(readLayout() || DEFAULT_LAYOUT);
+  setupPanelDrag();
+  setupPanelCollapse();
+  // Hide pool now that distribution is done (pool is already display:none via [hidden]).
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
+initPanelLayout();
 loadVideoList();
 setTarget(120);
 updateTimeline();
