@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🦝 RACCOON BPM</title>
+<title>🦝 RACCOON VISUALISER</title>
 <link rel="stylesheet" href="styles/base-styles.css">
 <link rel="stylesheet" id="themeDark"  href="styles/styles-dark.css">
 <link rel="stylesheet" id="themeLight" href="styles/styles-light.css" disabled>
@@ -12,7 +12,7 @@
 
 <div class="title-row">
   <div>
-    <h1>🦝 <span>RACCOON</span> BPM</h1>
+    <h1>🦝 <span>RACCOON</span> VISUALISER</h1>
     <p class="subtitle">Video Speed · Loop Control · BPM Sync</p>
   </div>
   <button id="themeToggle" title="Toggle theme">☀ LIGHT</button>
@@ -23,7 +23,7 @@
   <!-- LEFT TRACK — drag panels here -->
   <aside class="track" id="trackLeft" data-side="left"></aside>
 
-  <!-- CENTER STAGE — video + zoom row -->
+  <!-- CENTER STAGE — video only; controls live in panels now -->
   <section class="stage-col">
     <div class="video-stage" id="videoStage">
       <div class="video-wrap" id="videoWrap" data-mode="video">
@@ -31,18 +31,7 @@
         <img id="vidImg" alt="" hidden>
         <canvas class="crop-canvas" id="cropCanvas"></canvas>
         <svg class="crop-svg" id="cropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
-        <button class="fs-btn" id="fsEnterBtn" title="Fullscreen">⛶</button>
       </div>
-    </div>
-
-    <!-- ZOOM / CROP ROW — centered under stage -->
-    <div class="zoom-row">
-      <span>ZOOM</span>
-      <button class="zoom-btn" id="zoomOut">−</button>
-      <span class="zoom-val" id="zoomVal">100%</span>
-      <button class="zoom-btn" id="zoomIn">+</button>
-      <button class="crop-toggle-btn" id="cropToggleBtn">✂ SET CROP</button>
-      <button class="crop-reset-btn" id="cropResetBtn">✕ RESET</button>
     </div>
   </section>
 
@@ -57,7 +46,7 @@
   <!-- VIDEO LIBRARY PANEL -->
   <div class="panel" data-panel-id="library">
     <div class="panel-handle" draggable="true">
-      <span class="panel-label">Video Library — videos/ folder</span>
+      <span class="panel-label">Media Library — resources/ folder</span>
       <button class="panel-collapse-btn" title="Collapse">▾</button>
     </div>
     <div class="panel-body">
@@ -65,20 +54,46 @@
         <div class="no-videos">Loading…</div>
       </div>
       <div class="info-row">
-        Place video, GIF, or WebP files in the <code>videos/</code> folder and list them in
-        <code>videos/manifest.json</code> as an array of filenames,
+        Place video, GIF, or WebP files in the <code>resources/</code> folder and list them in
+        <code>resources/manifest.json</code> as an array of filenames,
         e.g. <code>["clip1.mp4","loop.gif","anim.webp"]</code>.
       </div>
     </div>
   </div>
 
-  <!-- EFFECTS PANEL -->
+  <!-- VIEW PANEL — fullscreen toggle in its own menu -->
+  <div class="panel" data-panel-id="view">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">View</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
+    </div>
+    <div class="panel-body">
+      <div class="view-row">
+        <button class="btn view-btn" id="fsEnterBtn" title="Enter fullscreen">⛶ FULLSCREEN</button>
+      </div>
+      <div class="info-row">
+        Press <code>Esc</code> to exit fullscreen. Inside fullscreen, click anywhere
+        to toggle the control bar.
+      </div>
+    </div>
+  </div>
+
+  <!-- EFFECTS PANEL — zoom/crop/reset + crop shape + colour + bounce -->
   <div class="panel effects-panel" data-panel-id="effects">
     <div class="panel-handle" draggable="true">
       <span class="panel-label">Effects</span>
       <button class="panel-collapse-btn" title="Collapse">▾</button>
     </div>
     <div class="panel-body">
+
+    <div class="zoom-row">
+      <span>ZOOM</span>
+      <button class="zoom-btn" id="zoomOut">−</button>
+      <span class="zoom-val" id="zoomVal">100%</span>
+      <button class="zoom-btn" id="zoomIn">+</button>
+      <button class="crop-toggle-btn" id="cropToggleBtn">✂ SET CROP</button>
+      <button class="crop-reset-btn" id="cropResetBtn">✕ RESET</button>
+    </div>
 
     <div class="shape-picker">
       <span>Crop shape:</span>
@@ -110,6 +125,66 @@
         <span id="bounceSpeedVal">180 px/s</span>
       </div>
     </div>
+    </div>
+  </div>
+
+  <!-- SPOTIFY PANEL -->
+  <div class="panel spotify-panel" data-panel-id="spotify">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">Spotify</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
+    </div>
+    <div class="panel-body">
+
+      <div class="spotify-auth">
+        <label class="panel-label" for="spotifyClientIdInput">Spotify Client ID</label>
+        <input type="text" id="spotifyClientIdInput" class="spotify-input" placeholder="Paste your Spotify Client ID">
+        <div class="info-row">
+          Register a free app at
+          <a href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener">developer.spotify.com/dashboard</a>
+          and add this exact redirect URI:<br>
+          <code id="spotifyRedirectUri">—</code>
+        </div>
+        <div class="spotify-auth-buttons">
+          <button class="btn spotify-login-btn" id="spotifyLoginBtn" disabled>SIGN IN WITH SPOTIFY</button>
+          <button class="btn spotify-logout-btn hidden" id="spotifyLogoutBtn">SIGN OUT</button>
+        </div>
+        <div class="spotify-status" id="spotifyStatus"></div>
+      </div>
+
+      <div class="spotify-track-info hidden" id="spotifyTrackInfo">
+        <img class="spotify-art" id="spotifyArt" alt="" hidden>
+        <div class="spotify-meta">
+          <div class="spotify-track" id="spotifyTrack">Nothing playing</div>
+          <div class="spotify-artist" id="spotifyArtist"></div>
+          <div class="spotify-bpm-row">
+            <span class="panel-label">BPM</span>
+            <span class="spotify-bpm" id="spotifyBpm">—</span>
+            <label class="spotify-sync">
+              <input type="checkbox" id="spotifySync"> sync video to track BPM
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="spotify-controls hidden" id="spotifyControls">
+        <div class="spotify-transport">
+          <button class="spotify-btn" id="spotifyPrev" title="Previous">⏮</button>
+          <button class="spotify-btn spotify-play" id="spotifyPlay" title="Play / pause">▶</button>
+          <button class="spotify-btn" id="spotifyNext" title="Next">⏭</button>
+          <button class="spotify-btn spotify-repeat" id="spotifyRepeat" title="Repeat">⟳ OFF</button>
+        </div>
+        <div class="spotify-volume-row">
+          <span class="panel-label">Volume</span>
+          <input type="range" id="spotifyVolume" min="0" max="100" step="1" value="50">
+          <span class="spotify-volume-val" id="spotifyVolumeVal">50%</span>
+        </div>
+        <div class="info-row">
+          Player controls require a Spotify Premium account and an active device
+          (e.g. Spotify desktop app open).
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -233,1272 +308,20 @@
   <div class="fs-hide-hint" id="fsHideHint">CLICK ANYWHERE TO SHOW CONTROLS</div>
 </div>
 
-<script>
-'use strict';
-
-// ═══════════════════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════════════════
-const vid    = document.getElementById('vid');
-const vidImg = document.getElementById('vidImg');
-let DURATION = 17.016667;
-let mediaMode = 'video';   // 'video' | 'image'
-
-const IMAGE_EXTS = ['gif', 'webp', 'apng', 'png', 'jpg', 'jpeg'];
-function extOf(name) { const m = /\.([^.]+)$/.exec(name); return m ? m[1].toLowerCase() : ''; }
-function isImageMedia(name) { return IMAGE_EXTS.includes(extOf(name)); }
-function getActiveMedia() { return mediaMode === 'image' ? vidImg : vid; }
-function getActiveSize() {
-  return mediaMode === 'image'
-    ? { w: vidImg.naturalWidth || 1, h: vidImg.naturalHeight || 1 }
-    : { w: vid.videoWidth || 9, h: vid.videoHeight || 16 };
-}
-
-let nativeBPM  = null;
-let targetBPM  = 120;
-let loopA      = 0;
-let loopB      = DURATION;
-let loopEnabled = false;
-let tapTimes   = [];
-let tapTimer   = null;
-
-let crop     = { x:0, y:0, w:1, h:1 };
-let hasCrop  = false;
-let zoomLevel = 1.0;
-
-let isFS       = false;
-let barVisible = true;
-let barPinned  = false;
-let barHideTimer = null;
-
-let cropDrawMode = false;
-let cropDrawing  = false;
-let cropDragPx   = { x0:0, y0:0 };
-let cropDragNorm = { nx:0, ny:0 };
-
-let cropShape    = 'rect';                 // 'rect' | 'circle' | 'freeform'
-let cropPath     = null;                   // freeform: array of {nx, ny}
-let cropBgColor  = null;                   // hex string when set, else null
-let lastFreeformPxPath = null;             // px points used while drawing on canvas
-
-let bounceOn      = false;
-let bounceX       = 0;
-let bounceY       = 0;
-let bounceVX      = 0;
-let bounceVY      = 0;
-let bounceSpeedPx = 180;
-let bounceLastT   = 0;
-let bounceRAF     = null;
-
-let currentVideo = null;
-
-// ═══════════════════════════════════════════════════════════════════
-// LOOP ENGINE — rAF polling guarantees the loop fires reliably
-// (timeupdate only fires ~4–8 Hz which causes missed boundaries)
-// ═══════════════════════════════════════════════════════════════════
-function rafLoop() {
-  if (!vid.paused && loopEnabled) {
-    const t = vid.currentTime;
-    if (t >= loopB - 0.04 || t < loopA - 0.04) {
-      vid.currentTime = loopA;
-    }
-  }
-  // Update cursors every frame
-  const dur = vid.duration || DURATION || 1;
-  const pct = vid.currentTime / dur;
-  const tl   = document.getElementById('timeline');
-  const fstl = document.getElementById('fsTimeline');
-  document.getElementById('cursor').style.left  = (pct * tl.clientWidth)   + 'px';
-  document.getElementById('fsCursor').style.left = (pct * fstl.clientWidth) + 'px';
-  requestAnimationFrame(rafLoop);
-}
-requestAnimationFrame(rafLoop);
-
-// ═══════════════════════════════════════════════════════════════════
-// BPM
-// ═══════════════════════════════════════════════════════════════════
-function applyBPM() {
-  const rate = nativeBPM ? Math.max(0.0625, Math.min(16, targetBPM / nativeBPM)) : 1;
-  vid.playbackRate = rate;
-  const d = targetBPM.toFixed(1);
-  document.getElementById('speedBadge').textContent  = rate.toFixed(3) + '×';
-  document.getElementById('bpmDisplay').textContent  = d;
-  document.getElementById('bpmText').value           = d;
-  document.getElementById('bpmSlider').value         = Math.min(220, Math.max(40, targetBPM));
-  document.getElementById('fsBpmDisplay').textContent = d;
-  document.getElementById('fsBpmInput').value         = d;
-  highlightPreset();
-}
-function setTarget(bpm) {
-  targetBPM = Math.max(1, Math.min(400, parseFloat(bpm) || 120));
-  applyBPM();
-}
-function setNative(bpm) {
-  nativeBPM = Math.max(1, parseFloat(bpm));
-  document.getElementById('nativeDisplay').textContent = nativeBPM.toFixed(1);
-  document.getElementById('infoRow').textContent =
-    `Native ${nativeBPM.toFixed(1)} BPM → playing at ${(targetBPM/nativeBPM).toFixed(3)}× speed.`;
-  applyBPM();
-}
-
-document.getElementById('bpmSlider').addEventListener('input', e => setTarget(e.target.value));
-['bpmText','fsBpmInput'].forEach(id => {
-  const el = document.getElementById(id);
-  el.addEventListener('change', e => setTarget(e.target.value));
-  el.addEventListener('keydown', e => { if (e.key === 'Enter') setTarget(e.target.value); });
-});
-
-function highlightPreset() {
-  document.querySelectorAll('.preset-btn').forEach(b =>
-    b.classList.toggle('active', parseFloat(b.dataset.bpm) === Math.round(targetBPM))
-  );
-}
-document.getElementById('presets').addEventListener('click', e => {
-  if (e.target.classList.contains('preset-btn')) setTarget(e.target.dataset.bpm);
-});
-
-// Tap tempo
-document.getElementById('tapBtn').addEventListener('click', () => {
-  const now = performance.now();
-  clearTimeout(tapTimer);
-  tapTimer = setTimeout(() => { tapTimes = []; }, 2500);
-  tapTimes.push(now);
-  if (tapTimes.length > 8) tapTimes.shift();
-  if (tapTimes.length >= 2) {
-    const ints = [];
-    for (let i = 1; i < tapTimes.length; i++) ints.push(tapTimes[i] - tapTimes[i-1]);
-    const avg = ints.reduce((a,b) => a+b, 0) / ints.length;
-    const tapped = 60000 / avg;
-    document.getElementById('nativeDisplay').textContent = tapped.toFixed(1) + ' (tapped)';
-    document.getElementById('setNativeBtn').dataset.pending = tapped.toFixed(2);
-  }
-});
-document.getElementById('setNativeBtn').addEventListener('click', () => {
-  const raw = document.getElementById('setNativeBtn').dataset.pending
-    || document.getElementById('nativeDisplay').textContent;
-  const v = parseFloat(raw);
-  if (!isNaN(v) && v > 0) setNative(v);
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// PLAY / PAUSE
-// ═══════════════════════════════════════════════════════════════════
-function syncPlayBtns() {
-  const p = vid.paused;
-  document.getElementById('playBtn').textContent   = p ? '▶' : '⏸';
-  document.getElementById('fsPlayBtn').textContent = p ? '▶' : '⏸';
-  document.getElementById('fsPlayBtn').classList.toggle('go', p);
-}
-['playBtn','fsPlayBtn'].forEach(id =>
-  document.getElementById(id).addEventListener('click', () =>
-    vid.paused ? vid.play() : vid.pause()
-  )
-);
-vid.addEventListener('play',  syncPlayBtns);
-vid.addEventListener('pause', syncPlayBtns);
-
-// ═══════════════════════════════════════════════════════════════════
-// LOOP REGION
-// ═══════════════════════════════════════════════════════════════════
-function syncLoopBtns() {
-  document.getElementById('loopToggle').classList.toggle('on', loopEnabled);
-  document.getElementById('fsLoopBtn').classList.toggle('on',  loopEnabled);
-  // When we manage looping ourselves, turn off the native video loop
-  vid.loop = !loopEnabled;
-}
-['loopToggle','fsLoopBtn'].forEach(id =>
-  document.getElementById(id).addEventListener('click', () => {
-    loopEnabled = !loopEnabled;
-    syncLoopBtns();
-  })
-);
-
-document.getElementById('setABtn').addEventListener('click', () => {
-  loopA = Math.min(vid.currentTime, loopB - 0.1); updateTimeline();
-});
-document.getElementById('setBBtn').addEventListener('click', () => {
-  loopB = Math.max(vid.currentTime, loopA + 0.1); updateTimeline();
-});
-document.getElementById('resetBtn').addEventListener('click', () => {
-  loopA = 0; loopB = vid.duration || DURATION; updateTimeline();
-});
-document.getElementById('previewBtn').addEventListener('click', () => {
-  vid.currentTime = loopA;
-  loopEnabled = true; syncLoopBtns();
-  if (vid.paused) vid.play();
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// TIMELINE UI
-// ═══════════════════════════════════════════════════════════════════
-function updateTimeline() {
-  const dur = vid.duration || DURATION || 1;
-  const pA  = loopA / dur, pB = loopB / dur;
-
-  const tl  = document.getElementById('timeline');
-  const w   = tl.clientWidth;
-  document.getElementById('region').style.left  = (pA * w) + 'px';
-  document.getElementById('region').style.width = ((pB - pA) * w) + 'px';
-  document.getElementById('handleA').style.left = (pA * w) + 'px';
-  document.getElementById('handleB').style.left = (pB * w) + 'px';
-  document.getElementById('loopADisplay').textContent   = loopA.toFixed(2) + 's';
-  document.getElementById('loopBDisplay').textContent   = loopB.toFixed(2) + 's';
-  document.getElementById('loopDurDisplay').textContent = (loopB - loopA).toFixed(2) + 's';
-
-  const fstl = document.getElementById('fsTimeline');
-  const fw   = fstl.clientWidth;
-  document.getElementById('fsRegion').style.left  = (pA * fw) + 'px';
-  document.getElementById('fsRegion').style.width = ((pB - pA) * fw) + 'px';
-  document.getElementById('fsHandleA').style.left = (pA * fw) + 'px';
-  document.getElementById('fsHandleB').style.left = (pB * fw) + 'px';
-}
-
-function makeHandleDraggable(handleId, isA) {
-  const handle = document.getElementById(handleId);
-  const tlId   = handleId.startsWith('fs') ? 'fsTimeline' : 'timeline';
-  let dragging = false;
-
-  function getT(cx) {
-    const tl   = document.getElementById(tlId);
-    const rect = tl.getBoundingClientRect();
-    return Math.max(0, Math.min(1, (cx - rect.left) / rect.width)) * (vid.duration || DURATION);
-  }
-  function start(e) {
-    e.preventDefault && e.preventDefault();
-    dragging = true;
-    document.addEventListener('mousemove', move);
-    document.addEventListener('mouseup',   stop);
-    document.addEventListener('touchmove', move, {passive:false});
-    document.addEventListener('touchend',  stop);
-  }
-  function move(e) {
-    if (!dragging) return;
-    e.preventDefault && e.preventDefault();
-    const cx = e.touches ? e.touches[0].clientX : e.clientX;
-    const t  = getT(cx);
-    if (isA) loopA = Math.min(t, loopB - 0.1);
-    else     loopB = Math.max(t, loopA + 0.1);
-    updateTimeline();
-  }
-  function stop() {
-    dragging = false;
-    document.removeEventListener('mousemove', move);
-    document.removeEventListener('mouseup',   stop);
-    document.removeEventListener('touchmove', move);
-    document.removeEventListener('touchend',  stop);
-  }
-  handle.addEventListener('mousedown', start);
-  handle.addEventListener('touchstart', e => { e.preventDefault(); start(e); }, {passive:false});
-}
-makeHandleDraggable('handleA',   true);
-makeHandleDraggable('handleB',   false);
-makeHandleDraggable('fsHandleA', true);
-makeHandleDraggable('fsHandleB', false);
-
-// Click timeline to seek
-function addSeek(tlId) {
-  document.getElementById(tlId).addEventListener('click', e => {
-    const aId = tlId === 'timeline' ? 'handleA' : 'fsHandleA';
-    const bId = tlId === 'timeline' ? 'handleB' : 'fsHandleB';
-    if (e.target.id === aId || e.target.id === bId) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    vid.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * (vid.duration || DURATION);
-  });
-}
-addSeek('timeline');
-addSeek('fsTimeline');
-
-// ═══════════════════════════════════════════════════════════════════
-// VIDEO LIST
-// ═══════════════════════════════════════════════════════════════════
-function fmtDur(s) {
-  if (!isFinite(s) || s <= 0) return '';
-  const m = Math.floor(s / 60), sec = Math.floor(s % 60).toString().padStart(2, '0');
-  return `${m}:${sec}`;
-}
-
-function buildVideoItem(filename, isActive) {
-  const item = document.createElement('div');
-  item.className = 'video-item' + (isActive ? ' active' : '');
-  const name = filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
-  const isImg = isImageMedia(filename);
-  const icon = isImg ? '◉' : '▶';
-  const tag = isImg ? `<span class="video-item-tag">${extOf(filename).toUpperCase()}</span>` : '';
-  item.innerHTML = `
-    <span class="video-item-icon">${icon}</span>
-    <span class="video-item-name" title="${filename}">${name}</span>
-    ${tag}
-    <span class="video-item-dur" id="vdur-${encodeURIComponent(filename)}"></span>
-  `;
-  item.addEventListener('click', () => loadVideo('videos/' + filename, item));
-
-  // Probe duration in background — videos only.
-  if (!isImg) {
-    const probe = document.createElement('video');
-    probe.preload = 'metadata';
-    probe.src = 'videos/' + filename;
-    probe.addEventListener('loadedmetadata', () => {
-      const el = document.getElementById('vdur-' + encodeURIComponent(filename));
-      if (el) el.textContent = fmtDur(probe.duration);
-      probe.src = '';
-    });
-  }
-
-  return item;
-}
-
-// ── MANIFEST — videos/manifest.json is the single source of truth ──
-async function loadVideoList() {
-  const listEl = document.getElementById('videoList');
-
-  let files = [];
-  try {
-    const res = await fetch('videos/manifest.json', { cache: 'no-cache' });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) files = data.filter(f => typeof f === 'string');
-    }
-  } catch (_) { /* fall through to empty */ }
-
-  listEl.innerHTML = '';
-
-  if (files.length === 0) {
-    listEl.innerHTML = `<div class="no-videos">No videos found.<br>
-      Add files to <code>videos/</code> and list them in <code>videos/manifest.json</code>.</div>`;
-    return;
-  }
-
-  const items = files.map((f, i) => {
-    const item = buildVideoItem(f, i === 0);
-    listEl.appendChild(item);
-    return item;
-  });
-
-  // Autoload the first manifest entry into the main video so the
-  // main screen always reflects the manifest.
-  loadVideo('videos/' + files[0], items[0]);
-}
-
-function loadVideo(src, itemEl) {
-  currentVideo = src;
-  // Reset everything
-  hasCrop = false; crop = { x:0, y:0, w:1, h:1 }; zoomLevel = 1;
-  cropPath = null;
-  loopEnabled = false; syncLoopBtns();
-  nativeBPM = null;
-  const nd = document.getElementById('nativeDisplay');  if (nd) nd.textContent = '--';
-  const ir = document.getElementById('infoRow');
-  if (ir) ir.textContent =
-    'Tap the beat of the video to set native BPM, then pick a target BPM above.\nVideo playback rate = Target ÷ Native.';
-  document.querySelectorAll('.video-item').forEach(el => el.classList.remove('active'));
-  if (itemEl) itemEl.classList.add('active');
-  ['cropSvg','fsCropSvg'].forEach(id => document.getElementById(id).classList.remove('vis'));
-
-  const filename = src.split('/').pop();
-  const wantImage = isImageMedia(filename);
-
-  if (wantImage) {
-    // Stop any video playback and switch to image mode
-    try { vid.pause(); } catch (_) {}
-    vid.removeAttribute('src');
-    vid.load();
-    mediaMode = 'image';
-    document.getElementById('videoWrap').dataset.mode = 'image';
-    vid.hidden = true;
-    vidImg.hidden = false;
-    vidImg.style.transform = '';
-    vidImg.src = src;
-  } else {
-    mediaMode = 'video';
-    document.getElementById('videoWrap').dataset.mode = 'video';
-    vidImg.hidden = true;
-    vid.hidden = false;
-    vidImg.removeAttribute('src');
-    vid.src = src;
-    vid.load();
-  }
-  updatePanelVisibilityForMode();
-  applyVideoTransform();
-}
-
-function updatePanelVisibilityForMode() {
-  const isImage = mediaMode === 'image';
-  document.querySelectorAll('[data-needs="video"]').forEach(el => {
-    el.classList.toggle('hidden-by-mode', isImage);
-  });
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// MEDIA LOAD — adapt wrap aspect ratio (shared video + image)
-// ═══════════════════════════════════════════════════════════════════
-function onMediaReady(natW, natH) {
-  if (mediaMode === 'video') {
-    DURATION = vid.duration || DURATION;
-    loopA = 0; loopB = DURATION;
-    updateTimeline();
-  }
-  applyBPM();
-
-  const wrap = document.getElementById('videoWrap');
-  const stage = document.getElementById('videoStage');
-  if (natW && natH && stage) {
-    const ar = natW / natH;
-    // Available stage area (account for stage padding/border by using clientRects).
-    const stageW = stage.clientWidth || 480;
-    const stageH = stage.clientHeight || 360;
-    let w = stageW, h = stageW / ar;
-    if (h > stageH) { h = stageH; w = stageH * ar; }
-    wrap.style.width = w + 'px';
-    wrap.style.height = h + 'px';
-  }
-
-  applyVideoTransform();
-  if (mediaMode === 'video') {
-    vid.play().catch(() => {});
-    syncPlayBtns();
-  }
-}
-
-vid.addEventListener('loadedmetadata', () => {
-  if (mediaMode !== 'video') return;
-  onMediaReady(vid.videoWidth, vid.videoHeight);
-});
-
-vidImg.addEventListener('load', () => {
-  if (mediaMode !== 'image') return;
-  onMediaReady(vidImg.naturalWidth, vidImg.naturalHeight);
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// ZOOM & CROP TRANSFORM
-// ═══════════════════════════════════════════════════════════════════
-function getRenderedBounds(wrapEl) {
-  const wW = wrapEl.clientWidth, wH = wrapEl.clientHeight;
-  const sz = getActiveSize();
-  const vW = sz.w, vH = sz.h;
-  const wAR = wW / wH, vAR = vW / vH;
-  let rendW, rendH;
-  if (vAR > wAR) { rendW = wW; rendH = wW / vAR; }
-  else           { rendH = wH; rendW = wH * vAR; }
-  return { offX:(wW-rendW)/2, offY:(wH-rendH)/2, rendW, rendH, wW, wH };
-}
-
-function applyVideoTransform() {
-  const wrapId = isFS ? 'fsVideoWrap' : 'videoWrap';
-  const wrap   = document.getElementById(wrapId);
-  const { offX, offY, rendW, rendH, wW, wH } = getRenderedBounds(wrap);
-  if (!rendW || !rendH) return;
-
-  const cxPx = crop.x * rendW, cyPx = crop.y * rendH;
-  const cwPx = crop.w * rendW, chPx = crop.h * rendH;
-  const baseScale = Math.min(wW / cwPx, wH / chPx);
-  const scale = baseScale * zoomLevel;
-  const cropCX = offX + cxPx + cwPx / 2;
-  const cropCY = offY + cyPx + chPx / 2;
-  const tx = wW / 2 - cropCX * scale;
-  const ty = wH / 2 - cropCY * scale;
-
-  // Apply transform to the active media element only; clear the inactive one.
-  const active = getActiveMedia();
-  active.style.transformOrigin = 'top left';
-  active.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-  const inactive = active === vid ? vidImg : vid;
-  inactive.style.transform = '';
-
-  const zpct = Math.round(zoomLevel * 100);
-  document.getElementById('zoomVal').textContent   = zpct + '%';
-  document.getElementById('fsZoomVal').textContent  = zpct + '%';
-
-  drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH, tx, ty, scale);
-}
-
-function drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH, tx, ty, scale) {
-  const svgId = wrapId === 'fsVideoWrap' ? 'fsCropSvg' : 'cropSvg';
-  const svg   = document.getElementById(svgId);
-  if (!hasCrop) { svg.classList.remove('vis'); return; }
-
-  // Project a point that lives in the wrap's pre-transform coordinate space
-  // through the same translate+scale that's applied to the media element,
-  // and normalize to the wrap's [0..1] viewBox. This is what makes the
-  // crop overlay align with the now-zoomed-in media after applyVideoTransform.
-  const proj = (px, py) => ({
-    x: (px * scale + tx) / wW,
-    y: (py * scale + ty) / wH
-  });
-  const projR = (px, py) => ({ w: (px * scale) / wW, h: (py * scale) / wH });
-
-  const cs = 0.013;
-  const outsideFill = cropBgColor || 'rgba(0,0,0,0.5)';
-
-  let cutoutShape;
-  let borderShape = '';
-  if (cropShape === 'circle') {
-    const cxPx = offX + crop.x * rendW + (crop.w * rendW) / 2;
-    const cyPx = offY + crop.y * rendH + (crop.h * rendH) / 2;
-    const c = proj(cxPx, cyPx);
-    // Use the smaller of the two scaled radii so the circle stays a circle
-    // even when the wrap's aspect ratio differs from the media's.
-    const rN = Math.min(crop.w * rendW, crop.h * rendH) / 2 * scale / Math.min(wW, wH);
-    cutoutShape = `<circle cx="${c.x}" cy="${c.y}" r="${rN}" fill="black"/>`;
-    if (!cropBgColor) {
-      borderShape = `<circle cx="${c.x}" cy="${c.y}" r="${rN}"
-        fill="none" stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>`;
-    }
-  } else if (cropShape === 'freeform' && cropPath && cropPath.length > 2) {
-    const pts = cropPath.map(p => {
-      const px = offX + p.nx * rendW;
-      const py = offY + p.ny * rendH;
-      const pp = proj(px, py);
-      return `${pp.x.toFixed(4)},${pp.y.toFixed(4)}`;
-    }).join(' ');
-    cutoutShape = `<polygon points="${pts}" fill="black"/>`;
-    if (!cropBgColor) {
-      borderShape = `<polygon points="${pts}" fill="none"
-        stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>`;
-    }
-  } else { // rect
-    const a = proj(offX + crop.x * rendW, offY + crop.y * rendH);
-    const r = projR(crop.w * rendW, crop.h * rendH);
-    const nx1 = a.x, ny1 = a.y, nw = r.w, nh = r.h;
-    cutoutShape = `<rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}" fill="black"/>`;
-    if (!cropBgColor) {
-      borderShape = `
-        <rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}"
-              fill="none" stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>
-        <rect x="${nx1-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
-        <rect x="${nx1+nw-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
-        <rect x="${nx1-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
-        <rect x="${nx1+nw-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
-      `;
-    }
-  }
-
-  svg.setAttribute('viewBox', '0 0 1 1');
-  svg.innerHTML = `
-    <defs>
-      <mask id="cm${svgId}">
-        <rect x="0" y="0" width="1" height="1" fill="white"/>
-        ${cutoutShape}
-      </mask>
-    </defs>
-    <rect x="0" y="0" width="1" height="1" fill="${outsideFill}" mask="url(#cm${svgId})"/>
-    ${borderShape}
-  `;
-  svg.classList.add('vis');
-}
-
-// ── Crop draw (rubber-band preview on canvas, only commit on mouseup) ──
-function screenToNorm(clientX, clientY) {
-  const wrapId = isFS ? 'fsVideoWrap' : 'videoWrap';
-  const wrap   = document.getElementById(wrapId);
-  const rect   = wrap.getBoundingClientRect();
-  const { offX, offY, rendW, rendH } = getRenderedBounds(wrap);
-  return {
-    nx: (clientX - rect.left - offX) / rendW,
-    ny: (clientY - rect.top  - offY) / rendH
-  };
-}
-
-function drawRubberBand(canvas, x0, y0, x1, y1) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.save();
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.fillStyle = 'rgba(0,0,0,1)';
-  ctx.beginPath();
-  if (cropShape === 'circle') {
-    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    const r = Math.hypot(x1 - x0, y1 - y0) / 2;
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-  } else {
-    const rx = Math.min(x0, x1), ry = Math.min(y0, y1);
-    const rw = Math.abs(x1 - x0), rh = Math.abs(y1 - y0);
-    ctx.rect(rx, ry, rw, rh);
-  }
-  ctx.fill();
-  ctx.restore();
-
-  ctx.strokeStyle = '#ffb800';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([6, 4]);
-  ctx.beginPath();
-  if (cropShape === 'circle') {
-    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-    const r = Math.hypot(x1 - x0, y1 - y0) / 2;
-    ctx.arc(cx, cy, r, 0, Math.PI * 2);
-    ctx.stroke();
-  } else {
-    const rx = Math.min(x0, x1), ry = Math.min(y0, y1);
-    const rw = Math.abs(x1 - x0), rh = Math.abs(y1 - y0);
-    ctx.strokeRect(rx, ry, rw, rh);
-    const cs = 6;
-    ctx.fillStyle = '#ffb800';
-    ctx.setLineDash([]);
-    [[rx, ry], [rx + rw, ry], [rx, ry + rh], [rx + rw, ry + rh]].forEach(([cx, cy]) =>
-      ctx.fillRect(cx - cs / 2, cy - cs / 2, cs, cs)
-    );
-  }
-}
-
-function drawFreeformPath(canvas, points) {
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  if (!points || points.length < 2) return;
-
-  ctx.save();
-  ctx.globalCompositeOperation = 'destination-out';
-  ctx.fillStyle = 'rgba(0,0,0,1)';
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-
-  ctx.strokeStyle = '#ffb800';
-  ctx.lineWidth = 2;
-  ctx.setLineDash([6, 4]);
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
-  ctx.closePath();
-  ctx.stroke();
-}
-
-function setupCropDraw(canvasId) {
-  const canvas = document.getElementById(canvasId);
-
-  function onDown(clientX, clientY) {
-    if (!cropDrawMode) return false;
-    cropDrawing = true;
-    const rect = canvas.getBoundingClientRect();
-    cropDragPx   = { x0: clientX - rect.left, y0: clientY - rect.top };
-    cropDragNorm = screenToNorm(clientX, clientY);
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    if (cropShape === 'freeform') {
-      lastFreeformPxPath = [{ x: cropDragPx.x0, y: cropDragPx.y0, nx: cropDragNorm.nx, ny: cropDragNorm.ny }];
-    } else {
-      lastFreeformPxPath = null;
-    }
-    return true;
-  }
-  function onMove(clientX, clientY) {
-    if (!cropDrawing) return;
-    const rect = canvas.getBoundingClientRect();
-    const px1 = clientX - rect.left, py1 = clientY - rect.top;
-    if (cropShape === 'freeform') {
-      const norm = screenToNorm(clientX, clientY);
-      lastFreeformPxPath.push({ x: px1, y: py1, nx: norm.nx, ny: norm.ny });
-      drawFreeformPath(canvas, lastFreeformPxPath);
-    } else {
-      drawRubberBand(canvas, cropDragPx.x0, cropDragPx.y0, px1, py1);
-    }
-  }
-  function onUp(clientX, clientY) {
-    if (!cropDrawing) return;
-    cropDrawing = false;
-    const end = screenToNorm(clientX, clientY);
-
-    if (cropShape === 'freeform') {
-      const path = lastFreeformPxPath || [];
-      if (path.length > 3) {
-        // Bounding box of normalized points
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (const p of path) {
-          if (p.nx < minX) minX = p.nx;
-          if (p.ny < minY) minY = p.ny;
-          if (p.nx > maxX) maxX = p.nx;
-          if (p.ny > maxY) maxY = p.ny;
-        }
-        const w = maxX - minX, h = maxY - minY;
-        if (w > 0.02 && h > 0.02) {
-          crop = { x: minX, y: minY, w, h };
-          cropPath = path.map(p => ({ nx: p.nx, ny: p.ny }));
-          hasCrop = true;
-        }
-      }
-      lastFreeformPxPath = null;
-    } else if (cropShape === 'circle') {
-      const cx = (cropDragNorm.nx + end.nx) / 2;
-      const cy = (cropDragNorm.ny + end.ny) / 2;
-      const r  = Math.hypot(end.nx - cropDragNorm.nx, end.ny - cropDragNorm.ny) / 2;
-      if (r > 0.01) {
-        crop = { x: cx - r, y: cy - r, w: 2 * r, h: 2 * r };
-        cropPath = null;
-        hasCrop = true;
-      }
-    } else { // rect
-      const x = Math.min(cropDragNorm.nx, end.nx);
-      const y = Math.min(cropDragNorm.ny, end.ny);
-      const w = Math.abs(end.nx - cropDragNorm.nx);
-      const h = Math.abs(end.ny - cropDragNorm.ny);
-      if (w > 0.02 && h > 0.02) {
-        crop = { x, y, w, h };
-        cropPath = null;
-        hasCrop = true;
-      }
-    }
-    exitCropMode();
-    applyVideoTransform();
-  }
-
-  canvas.addEventListener('mousedown', e => { e.preventDefault(); onDown(e.clientX, e.clientY); });
-  canvas.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
-  canvas.addEventListener('mouseup',   e => onUp(e.clientX, e.clientY));
-  canvas.addEventListener('mouseleave', e => {
-    // If mouse leaves canvas, commit what we have
-    if (cropDrawing) onUp(e.clientX, e.clientY);
-  });
-
-  canvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    onDown(e.touches[0].clientX, e.touches[0].clientY);
-  }, {passive:false});
-  canvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    onMove(e.touches[0].clientX, e.touches[0].clientY);
-  }, {passive:false});
-  canvas.addEventListener('touchend', e => {
-    e.preventDefault();
-    if (e.changedTouches.length)
-      onUp(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
-  }, {passive:false});
-}
-setupCropDraw('cropCanvas');
-setupCropDraw('fsCropCanvas');
-
-function enterCropMode() {
-  cropDrawMode = true;
-  const canvasId = isFS ? 'fsCropCanvas' : 'cropCanvas';
-  const wrapId   = isFS ? 'fsVideoWrap'  : 'videoWrap';
-  const canvas   = document.getElementById(canvasId);
-  const wrap     = document.getElementById(wrapId);
-  canvas.width  = wrap.clientWidth;
-  canvas.height = wrap.clientHeight;
-  Object.assign(canvas.style, {
-    position:'absolute', inset:'0',
-    width: wrap.clientWidth  + 'px',
-    height: wrap.clientHeight + 'px',
-    display: 'block',
-    cursor: 'crosshair',
-    zIndex: '25'
-  });
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-function exitCropMode() {
-  cropDrawMode = false; cropDrawing = false;
-  document.getElementById('cropCanvas').style.display   = 'none';
-  document.getElementById('fsCropCanvas').style.display = 'none';
-  document.getElementById('cropToggleBtn').classList.remove('active');
-  document.getElementById('fsCropBtn').classList.remove('y');
-}
-
-document.getElementById('cropToggleBtn').addEventListener('click', () => {
-  if (cropDrawMode) { exitCropMode(); return; }
-  document.getElementById('cropToggleBtn').classList.add('active');
-  enterCropMode();
-});
-document.getElementById('fsCropBtn').addEventListener('click', () => {
-  if (cropDrawMode) { exitCropMode(); return; }
-  document.getElementById('fsCropBtn').classList.add('y');
-  enterCropMode();
-});
-
-function resetCrop() {
-  crop = { x:0, y:0, w:1, h:1 }; hasCrop = false; zoomLevel = 1;
-  cropPath = null;
-  exitCropMode();
-  document.getElementById('cropSvg').classList.remove('vis');
-  document.getElementById('fsCropSvg').classList.remove('vis');
-  applyVideoTransform();
-}
-document.getElementById('cropResetBtn').addEventListener('click', resetCrop);
-document.getElementById('fsCropResetBtn').addEventListener('click', resetCrop);
-
-// ── Zoom ──
-function adjustZoom(delta) {
-  zoomLevel = Math.max(0.1, Math.min(10, zoomLevel + delta));
-  applyVideoTransform();
-}
-document.getElementById('zoomIn').addEventListener('click',     () => adjustZoom(0.1));
-document.getElementById('zoomOut').addEventListener('click',    () => adjustZoom(-0.1));
-document.getElementById('fsZoomInBtn').addEventListener('click', () => adjustZoom(0.1));
-document.getElementById('fsZoomOutBtn').addEventListener('click',() => adjustZoom(-0.1));
-
-['videoWrap','fsVideoWrap'].forEach(id =>
-  document.getElementById(id).addEventListener('wheel', e => {
-    if (e.ctrlKey || e.metaKey || isFS) {
-      e.preventDefault();
-      adjustZoom(e.deltaY < 0 ? 0.05 : -0.05);
-    }
-  }, {passive:false})
-);
-
-// ═══════════════════════════════════════════════════════════════════
-// FULLSCREEN
-// ═══════════════════════════════════════════════════════════════════
-const fsOverlay  = document.getElementById('fsOverlay');
-const fsVidWrap  = document.getElementById('fsVideoWrap');
-const vidWrap    = document.getElementById('videoWrap');
-
-function enterFS() {
-  isFS = true;
-  fsOverlay.classList.add('active');
-  // Move BOTH the video and image elements so either media kind works in FS.
-  fsVidWrap.insertBefore(vid,    document.getElementById('fsCropCanvas'));
-  fsVidWrap.insertBefore(vidImg, document.getElementById('fsCropCanvas'));
-  vid.style.maxWidth  = '100%'; vid.style.maxHeight = '100%';
-  vidImg.style.maxWidth = '100%'; vidImg.style.maxHeight = '100%';
-  // Clear any stale bounce transform on the wrap since we now move the media.
-  document.getElementById('videoWrap').style.transform = '';
-  barPinned = false; showBar(true);
-  if (fsOverlay.requestFullscreen) fsOverlay.requestFullscreen().catch(()=>{});
-  requestAnimationFrame(() => {
-    applyVideoTransform();
-    updateTimeline();
-    if (bounceOn) reseedBounceForArea();
-  });
-}
-function exitFS() {
-  isFS = false;
-  fsOverlay.classList.remove('active');
-  vidWrap.insertBefore(vid,    document.getElementById('cropCanvas'));
-  vidWrap.insertBefore(vidImg, document.getElementById('cropCanvas'));
-  vid.style.maxWidth = ''; vid.style.maxHeight = '';
-  vidImg.style.maxWidth = ''; vidImg.style.maxHeight = '';
-  // Clear any FS bounce transform from the media before we switch modes.
-  document.getElementById('fsVideoWrap').style.transform = '';
-  if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
-  requestAnimationFrame(() => {
-    applyVideoTransform();
-    updateTimeline();
-    if (bounceOn) reseedBounceForArea();
-  });
-}
-
-document.getElementById('fsEnterBtn').addEventListener('click', enterFS);
-document.getElementById('fsExitBtn').addEventListener('click',  exitFS);
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement && isFS) exitFS();
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && isFS) exitFS();
-  if (e.key === ' ' && isFS) { e.preventDefault(); vid.paused ? vid.play() : vid.pause(); }
-  if (e.key === 'ArrowRight') vid.currentTime = Math.min(vid.duration||DURATION, vid.currentTime + 0.5);
-  if (e.key === 'ArrowLeft')  vid.currentTime = Math.max(0, vid.currentTime - 0.5);
-});
-
-// ── Bar auto-hide ──
-const fsBar      = document.getElementById('fsBar');
-const fsHideHint = document.getElementById('fsHideHint');
-
-function showBar(reschedule) {
-  if (barPinned) return;
-  barVisible = true;
-  fsBar.classList.remove('hidden');
-  fsHideHint.classList.remove('vis');
-  if (reschedule) scheduleHide();
-}
-function hideBar() {
-  barVisible = false;
-  fsBar.classList.add('hidden');
-  fsHideHint.classList.add('vis');
-}
-function scheduleHide() {
-  clearTimeout(barHideTimer);
-  barHideTimer = setTimeout(() => { if (!barPinned) hideBar(); }, 3200);
-}
-
-fsOverlay.addEventListener('mousemove', () => { if (isFS && !barPinned) showBar(true); });
-fsOverlay.addEventListener('click', e => {
-  if (!isFS || e.target.closest('#fsBar') || cropDrawMode) return;
-  if (barPinned || !barVisible) { barPinned = false; showBar(true); }
-});
-document.getElementById('fsHideBarBtn').addEventListener('click', () => {
-  barPinned = !barPinned;
-  barPinned ? (clearTimeout(barHideTimer), hideBar()) : showBar(true);
-});
-fsBar.addEventListener('mouseenter', () => clearTimeout(barHideTimer));
-fsBar.addEventListener('mouseleave', scheduleHide);
-
-// ═══════════════════════════════════════════════════════════════════
-// BEAT FLASH
-// ═══════════════════════════════════════════════════════════════════
-let beatInterval = null;
-function startBeatFlash() {
-  clearInterval(beatInterval);
-  if (!vid.paused && nativeBPM) {
-    beatInterval = setInterval(() => {
-      ['bpmDisplay','fsBpmDisplay'].forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.add('flash');
-        setTimeout(() => el.classList.remove('flash'), 80);
-      });
-    }, 60000 / targetBPM);
-  }
-}
-vid.addEventListener('play',  startBeatFlash);
-vid.addEventListener('pause', () => clearInterval(beatInterval));
-
-// ═══════════════════════════════════════════════════════════════════
-// RESIZE
-// ═══════════════════════════════════════════════════════════════════
-new ResizeObserver(() => { applyVideoTransform(); updateTimeline(); })
-  .observe(document.getElementById('videoWrap'));
-new ResizeObserver(() => { if (isFS) { applyVideoTransform(); updateTimeline(); } })
-  .observe(document.getElementById('fsVideoWrap'));
-
-// Window resize: refit the video wrap to the new stage column size and
-// rescale bounce position into the new arena.
-window.addEventListener('resize', () => {
-  if (isFS) return;
-  const sz = getActiveSize();
-  if (sz.w && sz.h) onMediaReady(sz.w, sz.h);
-  if (bounceOn) reseedBounceForArea();
-});
-
-// ═══════════════════════════════════════════════════════════════════
-// THEME TOGGLE
-// ═══════════════════════════════════════════════════════════════════
-(function setupThemeToggle() {
-  const themeDark  = document.getElementById('themeDark');
-  const themeLight = document.getElementById('themeLight');
-  const themeBtn   = document.getElementById('themeToggle');
-
-  function applyTheme(mode) {
-    const dark = mode === 'dark';
-    themeDark.disabled  = !dark;
-    themeLight.disabled =  dark;
-    themeBtn.textContent = dark ? '☀ LIGHT' : '🌙 DARK';
-    try { localStorage.setItem('raccoon-theme', mode); } catch (_) {}
-    // Crop overlay uses --overlay tones — redraw to reflect any colour change.
-    if (typeof applyVideoTransform === 'function') applyVideoTransform();
-  }
-  themeBtn.addEventListener('click', () => {
-    applyTheme(themeDark.disabled ? 'dark' : 'light');
-  });
-  let stored = 'dark';
-  try { stored = localStorage.getItem('raccoon-theme') || 'dark'; } catch (_) {}
-  applyTheme(stored);
-})();
-
-// ═══════════════════════════════════════════════════════════════════
-// EFFECTS — shape picker + colour palette + bounce
-// ═══════════════════════════════════════════════════════════════════
-document.querySelectorAll('.shape-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    cropShape = btn.dataset.shape;
-    if (hasCrop) applyVideoTransform();
-  });
-});
-
-document.querySelectorAll('#colorPalette .color-swatch').forEach(sw => {
-  sw.addEventListener('click', () => {
-    document.querySelectorAll('#colorPalette .color-swatch').forEach(s => s.classList.remove('active'));
-    sw.classList.add('active');
-    const c = sw.dataset.color;
-    cropBgColor = (c === 'none') ? null : c;
-    applyVideoTransform();
-  });
-});
-
-// ── Bounce ──
-// In normal mode: the .video-wrap (sized to media aspect) is moved around
-// inside the larger .video-stage container. In fullscreen: fsVideoWrap acts
-// as both wrap and stage — the moving element is `vid` (or `vidImg`) itself,
-// constrained by the window.
-
-function getBounceTargets() {
-  if (isFS) {
-    // Move the active media element inside the fullscreen wrap.
-    const stage = document.getElementById('fsVideoWrap');
-    const mover = getActiveMedia();
-    return { stage, mover, useMediaTransform: true };
-  }
-  const stage = document.getElementById('videoStage');
-  const mover = document.getElementById('videoWrap');
-  return { stage, mover, useMediaTransform: false };
-}
-
-function getBounceArea() {
-  const { stage } = getBounceTargets();
-  return { w: stage.clientWidth, h: stage.clientHeight };
-}
-
-function applyBounceTransform() {
-  const { mover, useMediaTransform } = getBounceTargets();
-  if (useMediaTransform) {
-    // Compose with the existing crop/zoom transform (translate stays first
-    // since transformOrigin is top-left and translate happens after scale).
-    // Re-run applyVideoTransform with an extra offset baked in.
-    applyMediaTransformWithBounce(bounceX, bounceY);
-  } else {
-    mover.style.transform = `translate(${bounceX}px, ${bounceY}px)`;
-  }
-}
-
-// Variant of applyVideoTransform that adds a bounce offset to the media's
-// translate. Used in fullscreen mode where there is no separate wrap to move.
-function applyMediaTransformWithBounce(bx, by) {
-  const wrap = document.getElementById('fsVideoWrap');
-  const { offX, offY, rendW, rendH, wW, wH } = getRenderedBounds(wrap);
-  if (!rendW || !rendH) return;
-  const cwPx = crop.w * rendW, chPx = crop.h * rendH;
-  const baseScale = Math.min(wW / cwPx, wH / chPx);
-  const scale = baseScale * zoomLevel;
-  const cropCX = offX + crop.x * rendW + cwPx / 2;
-  const cropCY = offY + crop.y * rendH + chPx / 2;
-  const tx = wW / 2 - cropCX * scale + bx;
-  const ty = wH / 2 - cropCY * scale + by;
-  const active = getActiveMedia();
-  active.style.transformOrigin = 'top left';
-  active.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-}
-
-function bounceTick(now) {
-  if (!bounceOn) { bounceRAF = null; return; }
-  const dt = bounceLastT ? Math.min(0.05, (now - bounceLastT) / 1000) : 0;
-  bounceLastT = now;
-
-  const { stage, mover, useMediaTransform } = getBounceTargets();
-  const w = stage.clientWidth, h = stage.clientHeight;
-
-  let ww, wh;
-  if (useMediaTransform) {
-    // In fullscreen we move the media; the "moved size" approximates the
-    // visible cropped region which fills the wrap, so use stage size as both.
-    // We allow overflow off-screen freely — the box is the stage.
-    ww = mover.clientWidth || mover.naturalWidth || 0;
-    wh = mover.clientHeight || mover.naturalHeight || 0;
-    // Reduce by an arbitrary safety margin — clamping by the natural size
-    // doesn't reflect the post-scale render size, so just bound to stage.
-    ww = Math.min(ww, w);
-    wh = Math.min(wh, h);
-  } else {
-    ww = mover.clientWidth;
-    wh = mover.clientHeight;
-  }
-
-  bounceX += bounceVX * dt;
-  bounceY += bounceVY * dt;
-
-  const maxX = Math.max(0, w - ww);
-  const maxY = Math.max(0, h - wh);
-  if (bounceX < 0)    { bounceX = 0;    bounceVX = Math.abs(bounceVX); }
-  if (bounceX > maxX) { bounceX = maxX; bounceVX = -Math.abs(bounceVX); }
-  if (bounceY < 0)    { bounceY = 0;    bounceVY = Math.abs(bounceVY); }
-  if (bounceY > maxY) { bounceY = maxY; bounceVY = -Math.abs(bounceVY); }
-
-  applyBounceTransform();
-  bounceRAF = requestAnimationFrame(bounceTick);
-}
-
-function startBounce() {
-  bounceOn = true;
-  const { stage, mover } = getBounceTargets();
-  const w = stage.clientWidth, h = stage.clientHeight;
-  const mw = mover.clientWidth || 0, mh = mover.clientHeight || 0;
-  bounceX = Math.random() * Math.max(0, w - mw);
-  bounceY = Math.random() * Math.max(0, h - mh);
-  const angle = Math.random() * Math.PI * 2;
-  bounceVX = Math.cos(angle) * bounceSpeedPx;
-  bounceVY = Math.sin(angle) * bounceSpeedPx;
-  bounceLastT = 0;
-  const tb = document.getElementById('bounceToggle');
-  tb.textContent = '↗ BOUNCE ON';
-  tb.classList.add('active');
-  bounceRAF = requestAnimationFrame(bounceTick);
-}
-
-function stopBounce() {
-  bounceOn = false;
-  if (bounceRAF) cancelAnimationFrame(bounceRAF);
-  bounceRAF = null;
-  bounceX = 0; bounceY = 0;
-  // Clear bounce-induced transforms on every possible mover.
-  document.getElementById('videoWrap').style.transform = '';
-  document.getElementById('fsVideoWrap').style.transform = '';
-  // Reapply pure crop/zoom transform so the media isn't left offset.
-  applyVideoTransform();
-  const tb = document.getElementById('bounceToggle');
-  tb.textContent = '↗ BOUNCE OFF';
-  tb.classList.remove('active');
-}
-
-// Called when entering/exiting fullscreen while bounce is active so the
-// position is rescaled into the new arena instead of being abruptly clipped.
-function reseedBounceForArea() {
-  const { stage, mover } = getBounceTargets();
-  const w = stage.clientWidth, h = stage.clientHeight;
-  const mw = mover.clientWidth || 0, mh = mover.clientHeight || 0;
-  const maxX = Math.max(0, w - mw), maxY = Math.max(0, h - mh);
-  bounceX = Math.min(Math.max(0, bounceX), maxX);
-  bounceY = Math.min(Math.max(0, bounceY), maxY);
-  // If new area is degenerate, drop to corner so it doesn't get stuck.
-  if (maxX === 0) bounceX = 0;
-  if (maxY === 0) bounceY = 0;
-  // Clear stale wrapper transform left over from the other mode.
-  document.getElementById('videoWrap').style.transform = '';
-  document.getElementById('fsVideoWrap').style.transform = '';
-}
-
-document.getElementById('bounceToggle').addEventListener('click', () => {
-  bounceOn ? stopBounce() : startBounce();
-});
-
-(function setupBounceSpeedSlider() {
-  const bsEl = document.getElementById('bounceSpeed');
-  const bsVal = document.getElementById('bounceSpeedVal');
-  bsEl.addEventListener('input', () => {
-    bounceSpeedPx = parseFloat(bsEl.value);
-    bsVal.textContent = bounceSpeedPx + ' px/s';
-    const cur = Math.hypot(bounceVX, bounceVY) || 1;
-    bounceVX = bounceVX / cur * bounceSpeedPx;
-    bounceVY = bounceVY / cur * bounceSpeedPx;
-  });
-})();
-
-// ═══════════════════════════════════════════════════════════════════
-// PANEL LAYOUT — distribute panels across left/right tracks, with drag
-// reordering between tracks and collapsible panels. Persists to LS.
-// ═══════════════════════════════════════════════════════════════════
-const LAYOUT_KEY = 'raccoon.layout.v1';
-const DEFAULT_LAYOUT = {
-  left:  ['library', 'effects'],
-  right: ['bpm-display', 'bpm', 'loop'],
-  collapsed: []
-};
-
-function readLayout() {
-  try {
-    const raw = localStorage.getItem(LAYOUT_KEY);
-    if (!raw) return null;
-    const obj = JSON.parse(raw);
-    if (obj && Array.isArray(obj.left) && Array.isArray(obj.right)) return obj;
-  } catch (_) {}
-  return null;
-}
-function saveLayout() {
-  const left  = [...document.querySelectorAll('#trackLeft  > .panel')].map(p => p.dataset.panelId);
-  const right = [...document.querySelectorAll('#trackRight > .panel')].map(p => p.dataset.panelId);
-  const collapsed = [...document.querySelectorAll('.panel.collapsed')].map(p => p.dataset.panelId);
-  try { localStorage.setItem(LAYOUT_KEY, JSON.stringify({ left, right, collapsed })); }
-  catch (_) {}
-}
-
-function applyLayout(layout) {
-  const trackLeft  = document.getElementById('trackLeft');
-  const trackRight = document.getElementById('trackRight');
-  const pool       = document.getElementById('panelPool');
-  const known = new Set();
-
-  function moveById(id, track) {
-    const el = document.querySelector(`.panel[data-panel-id="${id}"]`);
-    if (!el) return;
-    track.appendChild(el);
-    known.add(id);
-  }
-  layout.left.forEach(id  => moveById(id, trackLeft));
-  layout.right.forEach(id => moveById(id, trackRight));
-
-  // Any panels not mentioned in the layout (e.g. new defaults added later)
-  // get appended to the right track so they're not orphaned in the pool.
-  document.querySelectorAll('#panelPool > .panel').forEach(p => {
-    if (!known.has(p.dataset.panelId)) trackRight.appendChild(p);
-  });
-
-  // Collapsed state
-  const collapsedSet = new Set(layout.collapsed || []);
-  document.querySelectorAll('.panel').forEach(p => {
-    p.classList.toggle('collapsed', collapsedSet.has(p.dataset.panelId));
-  });
-}
-
-function setupPanelDrag() {
-  let dragId = null;
-
-  document.addEventListener('dragstart', e => {
-    const handle = e.target.closest('.panel-handle');
-    if (!handle) return;
-    const panel = handle.closest('.panel');
-    if (!panel) return;
-    dragId = panel.dataset.panelId;
-    e.dataTransfer.effectAllowed = 'move';
-    try { e.dataTransfer.setData('text/plain', dragId); } catch (_) {}
-    panel.classList.add('dragging');
-  });
-  document.addEventListener('dragend', () => {
-    document.querySelectorAll('.panel.dragging').forEach(p => p.classList.remove('dragging'));
-    document.querySelectorAll('.track.drop-target').forEach(t => t.classList.remove('drop-target'));
-    dragId = null;
-  });
-
-  document.querySelectorAll('.track').forEach(track => {
-    track.addEventListener('dragover', e => {
-      if (!dragId) return;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'move';
-      track.classList.add('drop-target');
-    });
-    track.addEventListener('dragleave', e => {
-      if (e.target === track) track.classList.remove('drop-target');
-    });
-    track.addEventListener('drop', e => {
-      if (!dragId) return;
-      e.preventDefault();
-      track.classList.remove('drop-target');
-      const dragged = document.querySelector(`.panel[data-panel-id="${dragId}"]`);
-      if (!dragged) return;
-
-      // Insertion point: panel under the cursor's vertical position.
-      const after = [...track.querySelectorAll(':scope > .panel:not(.dragging)')]
-        .find(p => {
-          const r = p.getBoundingClientRect();
-          return e.clientY < r.top + r.height / 2;
-        });
-      if (after) track.insertBefore(dragged, after);
-      else track.appendChild(dragged);
-      saveLayout();
-    });
-  });
-}
-
-function setupPanelCollapse() {
-  document.querySelectorAll('.panel-collapse-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const panel = btn.closest('.panel');
-      if (!panel) return;
-      panel.classList.toggle('collapsed');
-      saveLayout();
-    });
-  });
-}
-
-function initPanelLayout() {
-  applyLayout(readLayout() || DEFAULT_LAYOUT);
-  setupPanelDrag();
-  setupPanelCollapse();
-  // Hide pool now that distribution is done (pool is already display:none via [hidden]).
-}
-
-// ═══════════════════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════════════════
-initPanelLayout();
-loadVideoList();
-setTarget(120);
-updateTimeline();
-applyVideoTransform();
-</script>
+<!-- Scripts: state first, then helpers, then features, then init -->
+<script src="scripts/state.js"></script>
+<script src="scripts/media.js"></script>
+<script src="scripts/transform.js"></script>
+<script src="scripts/bpm.js"></script>
+<script src="scripts/loop.js"></script>
+<script src="scripts/playback.js"></script>
+<script src="scripts/library.js"></script>
+<script src="scripts/crop.js"></script>
+<script src="scripts/effects.js"></script>
+<script src="scripts/fullscreen.js"></script>
+<script src="scripts/theme.js"></script>
+<script src="scripts/panels.js"></script>
+<script src="scripts/spotify.js"></script>
+<script src="scripts/main.js"></script>
 </body>
 </html>
