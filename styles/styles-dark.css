@@ -1,0 +1,34 @@
+/* DARK THEME — colours only. Black, red, orange. */
+:root {
+  --bg: #0a0a0a;
+  --panel: #111;
+  --border: #222;
+  --accent: #ff3c00;          /* orange/red */
+  --accent2: #ffb800;          /* yellow */
+  --accent-hover: #ff5522;
+  --text: #f0ede8;
+  --muted: #555;
+
+  --accent-glow: rgba(255, 60, 0, 0.4);
+  --accent-tint-1: rgba(255, 60, 0, 0.067);
+  --accent-tint-2: rgba(255, 60, 0, 0.13);
+  --accent-tint-3: rgba(255, 60, 0, 0.27);
+  --accent-tint-mid: rgba(255, 60, 0, 0.2);
+  --accent2-tint: rgba(255, 184, 0, 0.4);
+
+  --btn-on-text: #fff;          /* foreground colour on accent (orange) buttons */
+  --btn-on-text-2: #000;        /* foreground colour on accent2 (yellow) buttons */
+
+  --video-bg: #000;
+  --hover-tint: rgba(255, 255, 255, 0.02);
+  --surface-soft: rgba(255, 255, 255, 0.06);
+  --border-soft: rgba(255, 255, 255, 0.13);
+  --cursor-color: rgba(255, 255, 255, 0.4);
+
+  --fs-bg: #000;
+  --fs-bar-grad-strong: rgba(0, 0, 0, 0.95);
+  --fs-bar-grad-mid: rgba(0, 0, 0, 0.6);
+  --fs-btn-bg: rgba(0, 0, 0, 0.667);
+
+  --crop-overlay-dim: rgba(0, 0, 0, 0.5);
+}
