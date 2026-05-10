@@ -9,8 +9,8 @@
 const LAYOUT_KEY = 'raccoon.layout.v2';
 const DEFAULT_LAYOUT = {
   left:  ['library', 'view', 'effects'],
-  right: ['spotify', 'bpm-display', 'bpm', 'loop'],
-  collapsed: []
+  right: ['spotify', 'bpm-display', 'bpm', 'markers', 'loop'],
+  collapsed: ['markers']
 };
 
 function readLayout() {

@@ -245,6 +245,42 @@
     </div>
   </div>
 
+  <!-- BEAT MARKER PANEL -->
+  <div class="panel" data-panel-id="markers">
+    <div class="panel-handle" draggable="true">
+      <span class="panel-label">Beat Markers</span>
+      <button class="panel-collapse-btn" title="Collapse">▾</button>
+    </div>
+    <div class="panel-body">
+      <div class="info-row marker-empty" id="markerEmpty">
+        Click <strong>✎</strong> next to a library clip, then tap the thumbnail at every beat
+        (peak of a bounce, downbeat of a spin). Min 4 markers; 8–12 is more accurate.
+      </div>
+      <div class="marker-active hidden" id="markerActive">
+        <div class="marker-header">
+          <span class="panel-label" id="markerFilename"></span>
+          <span class="marker-progress hidden" id="markerProgress">
+            Extracting frames… <span id="markerProgressPct">0%</span>
+          </span>
+        </div>
+        <div class="marker-strip-wrap">
+          <div class="marker-strip" id="markerStrip"></div>
+        </div>
+        <div class="marker-stats">
+          <span>Marked: <span id="markerCount">0</span></span>
+          <span>Source BPM: <span id="markerBpm">—</span></span>
+        </div>
+        <div class="info-row marker-warn hidden" id="markerWarn"></div>
+        <div class="marker-actions">
+          <button class="btn" id="markerPreviewBtn">Preview</button>
+          <button class="btn" id="markerClearBtn">Clear</button>
+          <button class="btn" id="markerSaveBtn" disabled>Save</button>
+          <button class="btn" id="markerCloseBtn">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- LOOP EDITOR PANEL -->
   <div class="panel" data-panel-id="loop" data-needs="video">
     <div class="panel-handle" draggable="true">
@@ -318,6 +354,7 @@
 <script src="scripts/loop.js"></script>
 <script src="scripts/playback.js"></script>
 <script src="scripts/library.js"></script>
+<script src="scripts/marker.js"></script>
 <script src="scripts/crop.js"></script>
 <script src="scripts/effects.js"></script>
 <script src="scripts/fullscreen.js"></script>

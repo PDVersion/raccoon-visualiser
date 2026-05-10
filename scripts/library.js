@@ -9,17 +9,33 @@
 function buildVideoItem(filename, isActive) {
   const item = document.createElement('div');
   item.className = 'video-item' + (isActive ? ' active' : '');
-  const name  = filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
-  const isImg = isImageMedia(filename);
-  const icon  = isImg ? '◉' : '▶';
-  const tag   = isImg ? `<span class="video-item-tag">${extOf(filename).toUpperCase()}</span>` : '';
+  const name    = filename.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+  const isImg   = isImageMedia(filename);
+  const icon    = isImg ? '◉' : '▶';
+  const tag     = isImg ? `<span class="video-item-tag">${extOf(filename).toUpperCase()}</span>` : '';
+  const safeId  = encodeURIComponent(filename);
+  // Phase 2 wires the marker UI for videos only; animated-image marking
+  // arrives in phase 3, so disable the button for image kinds.
+  const markBtnTitle = isImg ? 'Animated-image marker arrives in phase 3' : 'Mark beats';
+  const markBtnDisabled = isImg ? 'disabled' : '';
   item.innerHTML = `
     <span class="video-item-icon">${icon}</span>
     <span class="video-item-name" title="${filename}">${name}</span>
     ${tag}
-    <span class="video-item-dur" id="vdur-${encodeURIComponent(filename)}"></span>
+    <span class="video-item-marked" id="vmark-${safeId}" hidden title="Source BPM cached">●</span>
+    <span class="video-item-dur" id="vdur-${safeId}"></span>
+    <button class="video-item-action" data-action="mark" title="${markBtnTitle}" ${markBtnDisabled}>✎</button>
   `;
-  item.addEventListener('click', () => loadVideo(MEDIA_FOLDER + '/' + filename, item));
+  item.addEventListener('click', e => {
+    if (e.target.closest('[data-action="mark"]')) return;
+    loadVideo(MEDIA_FOLDER + '/' + filename, item);
+  });
+  const markBtn = item.querySelector('[data-action="mark"]');
+  markBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    if (markBtn.disabled) return;
+    openMarker(MEDIA_FOLDER + '/' + filename, isImg ? extOf(filename) : 'video');
+  });
 
   // Probe duration in background — videos only.
   if (!isImg) {
@@ -27,13 +43,36 @@ function buildVideoItem(filename, isActive) {
     probe.preload = 'metadata';
     probe.src = MEDIA_FOLDER + '/' + filename;
     probe.addEventListener('loadedmetadata', () => {
-      const el = document.getElementById('vdur-' + encodeURIComponent(filename));
+      const el = document.getElementById('vdur-' + safeId);
       if (el) el.textContent = fmtDur(probe.duration);
       probe.src = '';
     });
   }
 
   return item;
+}
+
+function markLibraryItemAsMarked(filePath, isMarked) {
+  const filename = filePath.split('/').pop();
+  const el = document.getElementById('vmark-' + encodeURIComponent(filename));
+  if (el) el.hidden = !isMarked;
+}
+
+async function refreshMarkedIndicators() {
+  if (typeof processedCache === 'undefined') return;
+  try {
+    const all = await processedCache.list();
+    const keys = new Set(all.filter(r => r && r.sourceBPM).map(r => r.key));
+    document.querySelectorAll('.video-item').forEach(item => {
+      const btn = item.querySelector('[data-action="mark"]');
+      // recover filename from the title attribute on the name span
+      const span = item.querySelector('.video-item-name');
+      if (!span) return;
+      const filename = span.getAttribute('title');
+      if (!filename) return;
+      markLibraryItemAsMarked(MEDIA_FOLDER + '/' + filename, keys.has(MEDIA_FOLDER + '/' + filename));
+    });
+  } catch (_) {}
 }
 
 async function loadVideoList() {
@@ -63,11 +102,14 @@ async function loadVideoList() {
     return item;
   });
 
+  // Populate the cached-BPM dot for any items we already have markers for.
+  refreshMarkedIndicators();
+
   // Autoload the first manifest entry so the stage always reflects the manifest.
   loadVideo(MEDIA_FOLDER + '/' + files[0], items[0]);
 }
 
-function loadVideo(src, itemEl) {
+async function loadVideo(src, itemEl) {
   currentVideo = src;
   // Reset everything
   hasCrop = false; crop = { x:0, y:0, w:1, h:1 }; zoomLevel = 1;
@@ -107,6 +149,15 @@ function loadVideo(src, itemEl) {
   }
   updatePanelVisibilityForMode();
   applyVideoTransform();
+
+  // If we already know this clip's source BPM from a past marker session,
+  // restore it so playback rate auto-applies as soon as metadata is ready.
+  try {
+    const cached = await processedCache.get(src);
+    if (cached && cached.sourceBPM && currentVideo === src) {
+      setNative(cached.sourceBPM);
+    }
+  } catch (_) { /* cache miss / unavailable is non-fatal */ }
 }
 
 function updatePanelVisibilityForMode() {
