@@ -13,18 +13,14 @@ function buildVideoItem(filename, isActive) {
   const isImg   = isImageMedia(filename);
   const icon    = isImg ? '◉' : '▶';
   const tag     = isImg ? `<span class="video-item-tag">${extOf(filename).toUpperCase()}</span>` : '';
-  const safeId  = encodeURIComponent(filename);
-  // Phase 2 wires the marker UI for videos only; animated-image marking
-  // arrives in phase 3, so disable the button for image kinds.
-  const markBtnTitle = isImg ? 'Animated-image marker arrives in phase 3' : 'Mark beats';
-  const markBtnDisabled = isImg ? 'disabled' : '';
+  const safeId = encodeURIComponent(filename);
   item.innerHTML = `
     <span class="video-item-icon">${icon}</span>
     <span class="video-item-name" title="${filename}">${name}</span>
     ${tag}
     <span class="video-item-marked" id="vmark-${safeId}" hidden title="Source BPM cached">●</span>
     <span class="video-item-dur" id="vdur-${safeId}"></span>
-    <button class="video-item-action" data-action="mark" title="${markBtnTitle}" ${markBtnDisabled}>✎</button>
+    <button class="video-item-action" data-action="mark" title="Mark beats">✎</button>
   `;
   item.addEventListener('click', e => {
     if (e.target.closest('[data-action="mark"]')) return;
@@ -33,7 +29,6 @@ function buildVideoItem(filename, isActive) {
   const markBtn = item.querySelector('[data-action="mark"]');
   markBtn.addEventListener('click', e => {
     e.stopPropagation();
-    if (markBtn.disabled) return;
     openMarker(MEDIA_FOLDER + '/' + filename, isImg ? extOf(filename) : 'video');
   });
 
@@ -124,25 +119,53 @@ async function loadVideo(src, itemEl) {
   if (itemEl) itemEl.classList.add('active');
   ['cropSvg','fsCropSvg'].forEach(id => document.getElementById(id).classList.remove('vis'));
 
+  // Tear down any previously-mounted sprite — we may or may not remount.
+  if (typeof unmountSprite === 'function') unmountSprite();
+
+  // Look up the processed-media cache up front so we can pick the right
+  // playback path (sprite vs <img>) and avoid a visible flash.
+  let cached = null;
+  try { cached = await processedCache.get(src); }
+  catch (_) {}
+  if (currentVideo !== src) return;   // user clicked another item mid-fetch
+
   const filename  = src.split('/').pop();
   const wantImage = isImageMedia(filename);
+  const useSprite = wantImage && cached && cached.sprite && cached.sprite.blob;
 
-  if (wantImage) {
-    // Stop any video playback and switch to image mode
+  if (useSprite) {
+    // Sprite-sheet @keyframes playback path. We keep both the <img> source
+    // (untouched on disk) and the cached sprite blob; the sprite is preferred
+    // for speed so we don't re-decode + composite on every load.
+    try { vid.pause(); } catch (_) {}
+    vid.removeAttribute('src'); vid.load();
+    vidImg.removeAttribute('src');
+    mediaMode = 'sprite';
+    document.getElementById('videoWrap').dataset.mode = 'sprite';
+    vid.hidden       = true;
+    vidImg.hidden    = true;
+    vidSprite.hidden = false;
+    if (cached.sourceBPM) setNative(cached.sourceBPM);
+    mountSprite(cached.sprite, cached.sourceBPM);
+    onMediaReady(cached.sprite.frameW, cached.sprite.frameH);
+  } else if (wantImage) {
+    // Existing animated-image path via <img>; native frame rate, no retiming.
     try { vid.pause(); } catch (_) {}
     vid.removeAttribute('src');
     vid.load();
     mediaMode = 'image';
     document.getElementById('videoWrap').dataset.mode = 'image';
-    vid.hidden = true;
-    vidImg.hidden = false;
+    vid.hidden       = true;
+    vidImg.hidden    = false;
+    vidSprite.hidden = true;
     vidImg.style.transform = '';
     vidImg.src = src;
   } else {
     mediaMode = 'video';
     document.getElementById('videoWrap').dataset.mode = 'video';
-    vidImg.hidden = true;
-    vid.hidden = false;
+    vidImg.hidden    = true;
+    vid.hidden       = false;
+    vidSprite.hidden = true;
     vidImg.removeAttribute('src');
     vid.src = src;
     vid.load();
@@ -150,20 +173,20 @@ async function loadVideo(src, itemEl) {
   updatePanelVisibilityForMode();
   applyVideoTransform();
 
-  // If we already know this clip's source BPM from a past marker session,
-  // restore it so playback rate auto-applies as soon as metadata is ready.
-  try {
-    const cached = await processedCache.get(src);
-    if (cached && cached.sourceBPM && currentVideo === src) {
-      setNative(cached.sourceBPM);
-    }
-  } catch (_) { /* cache miss / unavailable is non-fatal */ }
+  // Apply cached source BPM for non-sprite paths (sprite path already did
+  // this synchronously above before mounting).
+  if (!useSprite && cached && cached.sourceBPM) {
+    setNative(cached.sourceBPM);
+  }
 }
 
 function updatePanelVisibilityForMode() {
-  const isImage = mediaMode === 'image';
+  // Loop region and tap-tempo-friendly target-BPM panels still apply in
+  // image-mode in spirit, but loop A/B is video-only. Hide video-only panels
+  // (already tagged data-needs="video") whenever we're not playing a <video>.
+  const notVideo = mediaMode !== 'video';
   document.querySelectorAll('[data-needs="video"]').forEach(el => {
-    el.classList.toggle('hidden-by-mode', isImage);
+    el.classList.toggle('hidden-by-mode', notVideo);
   });
 }
 

@@ -6,10 +6,11 @@
 // ═══════════════════════════════════════════════════════════════════
 
 // Media elements + mode
-var vid    = document.getElementById('vid');
-var vidImg = document.getElementById('vidImg');
+var vid       = document.getElementById('vid');
+var vidImg    = document.getElementById('vidImg');
+var vidSprite = document.getElementById('vidSprite');
 var DURATION  = 17.016667;
-var mediaMode = 'video';   // 'video' | 'image'
+var mediaMode = 'video';   // 'video' | 'image' | 'sprite'
 
 // BPM
 var nativeBPM = null;

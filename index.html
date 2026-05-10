@@ -29,6 +29,7 @@
       <div class="video-wrap" id="videoWrap" data-mode="video">
         <video id="vid" playsinline loop muted></video>
         <img id="vidImg" alt="" hidden>
+        <div id="vidSprite" hidden></div>
         <canvas class="crop-canvas" id="cropCanvas"></canvas>
         <svg class="crop-svg" id="cropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
       </div>
@@ -200,8 +201,9 @@
     </div>
   </div>
 
-  <!-- MAIN BPM PANEL -->
-  <div class="panel" data-panel-id="bpm" data-needs="video">
+  <!-- MAIN BPM PANEL — also drives sprite-mode CSS animation duration
+       via applyBPM(), so it stays visible outside <video> mode too. -->
+  <div class="panel" data-panel-id="bpm">
     <div class="panel-handle" draggable="true">
       <span class="panel-label">Target BPM</span>
       <button class="panel-collapse-btn" title="Collapse">▾</button>
@@ -260,7 +262,8 @@
         <div class="marker-header">
           <span class="panel-label" id="markerFilename"></span>
           <span class="marker-progress hidden" id="markerProgress">
-            Extracting frames… <span id="markerProgressPct">0%</span>
+            <span id="markerProgressText">Extracting frames…</span>
+            <span id="markerProgressPct">0%</span>
           </span>
         </div>
         <div class="marker-strip-wrap">
@@ -319,6 +322,7 @@
   <div id="fsVideoWrap">
     <canvas id="fsCropCanvas"></canvas>
     <svg id="fsCropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
+    <!-- vid, vidImg and vidSprite are inserted here by fullscreen.js on enterFS() -->
   </div>
 
   <div id="fsBar">
@@ -353,6 +357,8 @@
 <script src="scripts/bpm.js"></script>
 <script src="scripts/loop.js"></script>
 <script src="scripts/playback.js"></script>
+<script src="scripts/sprite.js"></script>
+<script src="scripts/sprite-playback.js"></script>
 <script src="scripts/library.js"></script>
 <script src="scripts/marker.js"></script>
 <script src="scripts/crop.js"></script>
