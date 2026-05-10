@@ -1,0 +1,34 @@
+/* LIGHT THEME — colours only. White, blue, purple. */
+:root {
+  --bg: #ffffff;
+  --panel: #f4f2ff;
+  --border: #d8d2ee;
+  --accent: #5b21b6;           /* purple */
+  --accent2: #2563eb;           /* blue */
+  --accent-hover: #4c1d95;
+  --text: #1a1a2e;
+  --muted: #6b6b87;
+
+  --accent-glow: rgba(91, 33, 182, 0.35);
+  --accent-tint-1: rgba(91, 33, 182, 0.07);
+  --accent-tint-2: rgba(91, 33, 182, 0.14);
+  --accent-tint-3: rgba(91, 33, 182, 0.27);
+  --accent-tint-mid: rgba(91, 33, 182, 0.2);
+  --accent2-tint: rgba(37, 99, 235, 0.35);
+
+  --btn-on-text: #fff;
+  --btn-on-text-2: #fff;
+
+  --video-bg: #1a1a2e;
+  --hover-tint: rgba(0, 0, 0, 0.04);
+  --surface-soft: rgba(0, 0, 0, 0.05);
+  --border-soft: rgba(0, 0, 0, 0.13);
+  --cursor-color: rgba(0, 0, 0, 0.4);
+
+  --fs-bg: #000;
+  --fs-bar-grad-strong: rgba(0, 0, 0, 0.95);
+  --fs-bar-grad-mid: rgba(0, 0, 0, 0.6);
+  --fs-btn-bg: rgba(0, 0, 0, 0.667);
+
+  --crop-overlay-dim: rgba(255, 255, 255, 0.55);
+}

@@ -4,422 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🦝 RACCOON BPM</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&display=swap');
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0a0a0a;
-    --panel: #111;
-    --border: #222;
-    --accent: #ff3c00;
-    --accent2: #ffb800;
-    --text: #f0ede8;
-    --muted: #555;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 24px 16px 48px;
-  }
-
-  h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3rem, 10vw, 6rem);
-    letter-spacing: 0.08em;
-    line-height: 1;
-    color: var(--text);
-    text-align: center;
-    margin-bottom: 4px;
-  }
-  h1 span { color: var(--accent); }
-
-  .subtitle {
-    font-size: 0.7rem;
-    color: var(--muted);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 28px;
-    text-align: center;
-  }
-
-  .app {
-    width: 100%;
-    max-width: 680px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  /* ── VIDEO ─────────────────────────────────────────────────── */
-  .video-outer {
-    display: flex;
-    justify-content: center;
-  }
-
-  .video-wrap {
-    position: relative;
-    background: #000;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    max-height: 480px;
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: width 0.3s, height 0.3s;
-  }
-
-  video {
-    display: block;
-    max-width: 100%;
-    max-height: 480px;
-    width: auto;
-    height: auto;
-    transform-origin: top left;
-  }
-
-  .fs-btn {
-    position: absolute; top: 8px; right: 8px; z-index: 30;
-    width: 32px; height: 32px; border-radius: 3px;
-    background: #000a; border: 1px solid #ffffff22; color: var(--text);
-    font-size: 0.9rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s, border-color 0.15s;
-    backdrop-filter: blur(4px);
-  }
-  .fs-btn:hover { background: var(--accent); border-color: var(--accent); }
-
-  .crop-canvas {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    cursor: crosshair; z-index: 20; display: none;
-  }
-
-  .crop-svg {
-    position: absolute; inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none; z-index: 21; display: none;
-  }
-  .crop-svg.vis { display: block; }
-
-  /* ── ZOOM / CROP ROW ───────────────────────────────────────── */
-  .zoom-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-    flex-wrap: wrap;
-  }
-  .zoom-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1rem; color: var(--accent2);
-    min-width: 46px; text-align: center;
-  }
-  .zoom-btn {
-    width: 28px; height: 28px;
-    background: transparent; border: 1px solid var(--border); border-radius: 2px;
-    color: var(--text); font-size: 1rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: border-color 0.15s, color 0.15s; flex-shrink: 0;
-  }
-  .zoom-btn:hover { border-color: var(--accent2); color: var(--accent2); }
-
-  .crop-toggle-btn, .crop-reset-btn {
-    font-family: 'DM Mono', monospace; font-size: 0.65rem;
-    padding: 4px 10px; background: transparent;
-    border: 1px solid var(--border); border-radius: 2px;
-    color: var(--muted); cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s;
-  }
-  .crop-toggle-btn:hover { border-color: var(--accent2); color: var(--accent2); }
-  .crop-toggle-btn.active { background: var(--accent2); border-color: var(--accent2); color: #000; }
-  .crop-reset-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* ── VIDEO LIST PANEL ──────────────────────────────────────── */
-  .video-list {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    max-height: 200px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-  .video-list::-webkit-scrollbar { width: 4px; }
-  .video-list::-webkit-scrollbar-track { background: transparent; }
-  .video-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  .video-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 12px; border-radius: 2px;
-    border: 1px solid transparent;
-    cursor: pointer; transition: all 0.12s;
-    font-size: 0.72rem; letter-spacing: 0.04em; color: var(--muted);
-  }
-  .video-item:hover { border-color: var(--border); color: var(--text); background: #ffffff05; }
-  .video-item.active { border-color: var(--accent); color: var(--accent); background: #ff3c0011; }
-  .video-item-icon { font-size: 0.8rem; flex-shrink: 0; opacity: 0.5; }
-  .video-item.active .video-item-icon { opacity: 1; }
-  .video-item-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .video-item-dur { font-size: 0.6rem; color: var(--muted); flex-shrink: 0; font-variant-numeric: tabular-nums; }
-
-  .no-videos { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; padding: 10px 0; line-height: 2; }
-  .no-videos code { color: var(--accent2); }
-
-  /* ── BPM DISPLAY ───────────────────────────────────────────── */
-  .bpm-readout {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 18vw, 9rem);
-    line-height: 1; color: var(--accent); text-align: center;
-    letter-spacing: 0.04em; text-shadow: 0 0 40px #ff3c0055;
-    user-select: none; cursor: default; transition: color 0.1s;
-  }
-  .bpm-readout.flash { color: var(--accent2); }
-  .bpm-unit {
-    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
-    color: var(--muted); letter-spacing: 0.3em; text-align: center;
-    margin-top: -10px; margin-bottom: 8px;
-  }
-
-  /* ── PANEL ─────────────────────────────────────────────────── */
-  .panel {
-    background: var(--panel); border: 1px solid var(--border);
-    border-radius: 4px; padding: 20px;
-    display: flex; flex-direction: column; gap: 16px;
-  }
-  .panel-label {
-    font-size: 0.65rem; letter-spacing: 0.25em;
-    color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
-  }
-
-  /* ── BPM SLIDER ────────────────────────────────────────────── */
-  .bpm-row { display: flex; align-items: center; gap: 12px; }
-  .slider-wrap { flex: 1; }
-
-  input[type=range] {
-    -webkit-appearance: none; width: 100%; height: 6px;
-    background: var(--border); border-radius: 3px; outline: none; cursor: pointer;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); border: 3px solid var(--bg);
-    box-shadow: 0 0 8px #ff3c0066; cursor: grab; transition: transform 0.1s;
-  }
-  input[type=range]:active::-webkit-slider-thumb { transform: scale(1.2); cursor: grabbing; }
-  input[type=range]::-moz-range-thumb {
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); border: 3px solid var(--bg); cursor: grab;
-  }
-
-  .bpm-input {
-    width: 88px; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 3px; color: var(--text); font-family: 'DM Mono', monospace;
-    font-size: 1rem; padding: 7px 10px; text-align: center; outline: none;
-    transition: border-color 0.2s; flex-shrink: 0;
-  }
-  .bpm-input:focus { border-color: var(--accent); }
-
-  /* ── PRESETS ───────────────────────────────────────────────── */
-  .presets { display: flex; flex-wrap: wrap; gap: 6px; }
-  .preset-btn {
-    font-family: 'DM Mono', monospace; font-size: 0.7rem;
-    padding: 4px 10px; background: transparent;
-    border: 1px solid var(--border); border-radius: 2px; color: var(--muted);
-    cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
-  }
-  .preset-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .preset-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  /* ── NATIVE BPM ────────────────────────────────────────────── */
-  .native-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .native-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.15em; text-transform: uppercase; }
-  .native-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent2); }
-  .tap-btn {
-    font-family: 'DM Mono', monospace; font-size: 0.7rem; padding: 6px 14px;
-    background: transparent; border: 1px solid var(--accent2);
-    border-radius: 2px; color: var(--accent2); cursor: pointer;
-    letter-spacing: 0.1em; transition: all 0.15s; user-select: none;
-  }
-  .tap-btn:hover { background: var(--accent2); color: #000; }
-  .tap-btn:active { transform: scale(0.95); }
-  .info-row { font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em; line-height: 1.6; }
-  .speed-badge { margin-left: auto; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; }
-  .speed-badge span { color: var(--accent2); }
-
-  /* ── BUTTONS ───────────────────────────────────────────────── */
-  .btn {
-    font-family: 'DM Mono', monospace; font-size: 0.72rem;
-    padding: 7px 16px; border-radius: 2px;
-    border: 1px solid var(--border); background: transparent;
-    color: var(--text); cursor: pointer; letter-spacing: 0.08em; transition: all 0.15s;
-  }
-  .btn:hover { border-color: var(--text); }
-  .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-  /* ── PLAY CONTROLS ─────────────────────────────────────────── */
-  .play-controls { display: flex; gap: 8px; align-items: center; }
-  .play-btn {
-    width: 48px; height: 48px; border-radius: 50%;
-    background: var(--accent); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; transition: transform 0.1s, background 0.15s; flex-shrink: 0;
-  }
-  .play-btn:hover { background: #ff5522; }
-  .play-btn:active { transform: scale(0.92); }
-
-  .loop-toggle {
-    font-family: 'Bebas Neue', sans-serif; font-size: 1rem; letter-spacing: 0.1em;
-    padding: 0 14px; height: 36px; border-radius: 2px;
-    border: 1px solid var(--border); background: transparent; color: var(--muted);
-    cursor: pointer; transition: all 0.15s;
-  }
-  .loop-toggle.on { border-color: var(--accent); color: var(--accent); background: #ff3c0011; }
-
-  /* ── TIMELINE ──────────────────────────────────────────────── */
-  .timeline-wrap {
-    position: relative; height: 52px; background: var(--bg);
-    border: 1px solid var(--border); border-radius: 3px;
-    cursor: crosshair; overflow: hidden; user-select: none;
-  }
-  .timeline-track {
-    position: absolute; top: 50%; left: 0; right: 0;
-    height: 4px; background: var(--border); transform: translateY(-50%);
-  }
-  .timeline-region {
-    position: absolute; top: 0; bottom: 0;
-    background: linear-gradient(180deg, #ff3c0022, #ff3c0044);
-    border-left: 2px solid var(--accent); border-right: 2px solid var(--accent2);
-    pointer-events: none;
-  }
-  .timeline-cursor {
-    position: absolute; top: 0; bottom: 0;
-    width: 2px; background: #fff5; pointer-events: none;
-  }
-  .handle {
-    position: absolute; top: 0; bottom: 0;
-    width: 14px; cursor: ew-resize; z-index: 10; transform: translateX(-7px);
-  }
-  .handle-A { background: linear-gradient(90deg, var(--accent)66, transparent); }
-  .handle-B { background: linear-gradient(270deg, var(--accent2)66, transparent); }
-  .loop-times { display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--muted); }
-  .loop-time-val { color: var(--text); }
-  .loop-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-  /* ════════════════════════════════════════════════════════════
-     FULLSCREEN OVERLAY
-  ════════════════════════════════════════════════════════════ */
-  #fsOverlay {
-    display: none; position: fixed; inset: 0; background: #000;
-    z-index: 1000; overflow: hidden;
-  }
-  #fsOverlay.active { display: block; }
-
-  #fsVideoWrap {
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center; overflow: hidden;
-  }
-  #fsVideoWrap video {
-    max-width: 100%; max-height: 100%; width: auto; height: auto;
-    display: block; transform-origin: top left;
-  }
-  #fsCropCanvas {
-    position: absolute; inset: 0; cursor: crosshair; z-index: 10; display: none;
-  }
-  #fsCropSvg {
-    position: absolute; inset: 0; pointer-events: none; z-index: 11; display: none;
-    width: 100%; height: 100%;
-  }
-  #fsCropSvg.vis { display: block; }
-
-  /* ── FS BOTTOM BAR ─────────────────────────────────────────── */
-  #fsBar {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 58px;
-    background: linear-gradient(0deg, #000000f2 0%, #00000099 70%, transparent 100%);
-    backdrop-filter: blur(10px);
-    display: flex; align-items: center; gap: 8px; padding: 0 14px;
-    transition: opacity 0.3s, transform 0.3s; z-index: 20;
-  }
-  #fsBar.hidden { opacity: 0; transform: translateY(14px); pointer-events: none; }
-
-  .fs-bpm {
-    font-family: 'Bebas Neue', sans-serif; font-size: 1.5rem;
-    color: var(--accent); letter-spacing: 0.05em; line-height: 1;
-    text-shadow: 0 0 16px #ff3c0066; min-width: 64px; white-space: nowrap;
-  }
-  .fs-bpm.flash { color: var(--accent2); }
-
-  .fs-timeline {
-    flex: 1; position: relative; height: 22px;
-    background: #ffffff10; border-radius: 2px;
-    cursor: crosshair; overflow: hidden; user-select: none; min-width: 60px;
-  }
-  .fs-tl-region {
-    position: absolute; top: 0; bottom: 0;
-    background: #ff3c0033; border-left: 2px solid var(--accent); border-right: 2px solid var(--accent2);
-    pointer-events: none;
-  }
-  .fs-tl-cursor { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff6; pointer-events: none; }
-  .fs-handle {
-    position: absolute; top: 0; bottom: 0; width: 10px; cursor: ew-resize; z-index: 5; transform: translateX(-5px);
-  }
-  .fs-handle-A { background: linear-gradient(90deg, var(--accent)77, transparent); }
-  .fs-handle-B { background: linear-gradient(270deg, var(--accent2)77, transparent); }
-
-  .fs-icon-btn {
-    width: 34px; height: 34px; background: transparent;
-    border: 1px solid #ffffff22; border-radius: 3px;
-    color: var(--text); font-size: 0.95rem; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: background 0.15s, border-color 0.15s;
-    flex-shrink: 0; font-family: 'DM Mono', monospace;
-  }
-  .fs-icon-btn:hover { border-color: #fff5; background: #ffffff11; }
-  .fs-icon-btn.go { background: var(--accent); border-color: var(--accent); }
-  .fs-icon-btn.y  { background: var(--accent2); border-color: var(--accent2); color: #000; }
-  .fs-icon-btn.on { border-color: var(--accent); color: var(--accent); }
-  .fs-exit { min-width: 44px; padding: 0 6px; font-size: 0.6rem; letter-spacing: 0.05em; }
-
-  .fs-zoom-val {
-    font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem;
-    color: var(--accent2); min-width: 36px; text-align: center;
-  }
-  .fs-bpm-input {
-    width: 60px; background: #ffffff0a; border: 1px solid #ffffff22;
-    border-radius: 2px; color: var(--text); font-family: 'DM Mono', monospace;
-    font-size: 0.7rem; padding: 4px 6px; text-align: center; outline: none;
-  }
-  .fs-bpm-input:focus { border-color: var(--accent); }
-
-  .fs-hide-hint {
-    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
-    font-size: 0.55rem; color: #ffffff25; letter-spacing: 0.15em;
-    pointer-events: none; transition: opacity 0.4s; opacity: 0; white-space: nowrap;
-  }
-  .fs-hide-hint.vis { opacity: 1; }
-</style>
+<link rel="stylesheet" href="styles/base-styles.css">
+<link rel="stylesheet" id="themeDark"  href="styles/styles-dark.css">
+<link rel="stylesheet" id="themeLight" href="styles/styles-light.css" disabled>
 </head>
 <body>
 
-<h1>🦝 <span>RACCOON</span> BPM</h1>
-<p class="subtitle">Video Speed · Loop Control · BPM Sync</p>
+<div class="title-row">
+  <div>
+    <h1>🦝 <span>RACCOON</span> BPM</h1>
+    <p class="subtitle">Video Speed · Loop Control · BPM Sync</p>
+  </div>
+  <button id="themeToggle" title="Toggle theme">☀ LIGHT</button>
+</div>
 
 <div class="app">
 
   <!-- VIDEO -->
   <div class="video-outer">
     <div class="video-wrap" id="videoWrap">
-      <video id="vid" src="videos/pedro_raccoon.mp4" playsinline loop muted></video>
+      <video id="vid" playsinline loop muted></video>
       <canvas class="crop-canvas" id="cropCanvas"></canvas>
       <svg class="crop-svg" id="cropSvg" viewBox="0 0 1 1" preserveAspectRatio="none"></svg>
       <button class="fs-btn" id="fsEnterBtn" title="Fullscreen">⛶</button>
@@ -443,9 +47,45 @@
       <div class="no-videos">Loading…</div>
     </div>
     <div class="info-row">
-      Place video files in the <code style="color:var(--accent2)">videos/</code> folder and list them in
-      <code style="color:var(--accent2)">videos/manifest.json</code> as an array of filenames,
-      e.g. <code style="color:var(--accent2)">["pedro_raccon.mp4","clip2.mp4"]</code>
+      Place video files in the <code>videos/</code> folder and list them in
+      <code>videos/manifest.json</code> as an array of filenames,
+      e.g. <code>["clip1.mp4","clip2.mp4"]</code>.
+    </div>
+  </div>
+
+  <!-- EFFECTS PANEL -->
+  <div class="panel effects-panel">
+    <div class="panel-label">Effects</div>
+
+    <div class="shape-picker">
+      <span>Crop shape:</span>
+      <button class="btn shape-btn active" data-shape="rect">▭ RECT</button>
+      <button class="btn shape-btn" data-shape="circle">◯ CIRCLE</button>
+      <button class="btn shape-btn" data-shape="freeform">✎ FREEFORM</button>
+    </div>
+
+    <div>
+      <div class="panel-label">Background colour (outside crop)</div>
+      <div class="color-palette" id="colorPalette">
+        <button class="color-swatch active" data-color="none"    title="No fill (darken)" style="background:repeating-linear-gradient(45deg,#888 0 4px,#444 4px 8px);"></button>
+        <button class="color-swatch" data-color="#000000" title="Black"  style="background:#000000;"></button>
+        <button class="color-swatch" data-color="#ffffff" title="White"  style="background:#ffffff;"></button>
+        <button class="color-swatch" data-color="#e11d48" title="Red"    style="background:#e11d48;"></button>
+        <button class="color-swatch" data-color="#f97316" title="Orange" style="background:#f97316;"></button>
+        <button class="color-swatch" data-color="#facc15" title="Yellow" style="background:#facc15;"></button>
+        <button class="color-swatch" data-color="#22c55e" title="Green"  style="background:#22c55e;"></button>
+        <button class="color-swatch" data-color="#3b82f6" title="Blue"   style="background:#3b82f6;"></button>
+        <button class="color-swatch" data-color="#a855f7" title="Purple" style="background:#a855f7;"></button>
+      </div>
+    </div>
+
+    <div class="bounce-row">
+      <button class="btn" id="bounceToggle">↗ BOUNCE OFF</button>
+      <div class="speed-slider-row">
+        <span>Speed</span>
+        <input type="range" id="bounceSpeed" min="20" max="600" step="10" value="180">
+        <span id="bounceSpeedVal">180 px/s</span>
+      </div>
     </div>
   </div>
 
@@ -582,7 +222,21 @@ let cropDrawing  = false;
 let cropDragPx   = { x0:0, y0:0 };
 let cropDragNorm = { nx:0, ny:0 };
 
-let currentVideo = 'videos/pedro_raccoon.mp4';
+let cropShape    = 'rect';                 // 'rect' | 'circle' | 'freeform'
+let cropPath     = null;                   // freeform: array of {nx, ny}
+let cropBgColor  = null;                   // hex string when set, else null
+let lastFreeformPxPath = null;             // px points used while drawing on canvas
+
+let bounceOn      = false;
+let bounceX       = 0;
+let bounceY       = 0;
+let bounceVX      = 0;
+let bounceVY      = 0;
+let bounceSpeedPx = 180;
+let bounceLastT   = 0;
+let bounceRAF     = null;
+
+let currentVideo = null;
 
 // ═══════════════════════════════════════════════════════════════════
 // LOOP ENGINE — rAF polling guarantees the loop fires reliably
@@ -833,48 +487,43 @@ function buildVideoItem(filename, isActive) {
   return item;
 }
 
-// ── MANIFEST — edit this array to match your videos/ folder ──────
-// This is the single source of truth. The manifest.json file is kept
-// in sync as a backup, but this inline list is what the page uses.
-const VIDEO_MANIFEST = [
-  "pedro_raccoon.mp4",
-  "pedro_raccoon_full.mp4"
-];
-
+// ── MANIFEST — videos/manifest.json is the single source of truth ──
 async function loadVideoList() {
   const listEl = document.getElementById('videoList');
 
-  // Start with the inline manifest (always works, no fetch needed)
-  let files = VIDEO_MANIFEST.slice();
-
-  // Optionally try fetching manifest.json to pick up any additions
-  // without needing to edit the HTML — but never replace if fetch fails
+  let files = [];
   try {
     const res = await fetch('videos/manifest.json', { cache: 'no-cache' });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data) && data.length > 0) files = data;
+      if (Array.isArray(data)) files = data.filter(f => typeof f === 'string');
     }
-  } catch (_) { /* use inline manifest */ }
+  } catch (_) { /* fall through to empty */ }
 
   listEl.innerHTML = '';
 
   if (files.length === 0) {
     listEl.innerHTML = `<div class="no-videos">No videos found.<br>
-      Add files to <code>videos/</code> and update VIDEO_MANIFEST in the HTML.</div>`;
+      Add files to <code>videos/</code> and list them in <code>videos/manifest.json</code>.</div>`;
     return;
   }
 
-  files.forEach(f => {
-    const active = ('videos/' + f === currentVideo || f === currentVideo);
-    listEl.appendChild(buildVideoItem(f, active));
+  const items = files.map((f, i) => {
+    const item = buildVideoItem(f, i === 0);
+    listEl.appendChild(item);
+    return item;
   });
+
+  // Autoload the first manifest entry into the main video so the
+  // main screen always reflects the manifest.
+  loadVideo('videos/' + files[0], items[0]);
 }
 
 function loadVideo(src, itemEl) {
   currentVideo = src;
   // Reset everything
   hasCrop = false; crop = { x:0, y:0, w:1, h:1 }; zoomLevel = 1;
+  cropPath = null;
   loopEnabled = false; syncLoopBtns();
   nativeBPM = null;
   document.getElementById('nativeDisplay').textContent = '--';
@@ -968,26 +617,57 @@ function drawCropOverlay(wrapId, offX, offY, rendW, rendH, wW, wH) {
   if (!hasCrop) { svg.classList.remove('vis'); return; }
 
   const ax = offX + crop.x * rendW,        ay = offY + crop.y * rendH;
-  const bx = offX + (crop.x+crop.w)*rendW, by = offY + (crop.y+crop.h)*rendH;
   const nx1 = ax/wW, ny1 = ay/wH;
-  const nw  = (bx-ax)/wW, nh = (by-ay)/wH;
+  const nw  = (crop.w * rendW)/wW, nh = (crop.h * rendH)/wH;
   const cs  = 0.013;
+
+  // Outside-fill: solid colour if user picked one, else 50% black darken.
+  const outsideFill = cropBgColor || 'rgba(0,0,0,0.5)';
+
+  let cutoutShape;
+  let borderShape = '';
+  if (cropShape === 'circle') {
+    const cxN = nx1 + nw/2, cyN = ny1 + nh/2, rN = Math.min(nw, nh)/2;
+    cutoutShape = `<circle cx="${cxN}" cy="${cyN}" r="${rN}" fill="black"/>`;
+    if (!cropBgColor) {
+      borderShape = `<circle cx="${cxN}" cy="${cyN}" r="${rN}"
+        fill="none" stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>`;
+    }
+  } else if (cropShape === 'freeform' && cropPath && cropPath.length > 2) {
+    const pts = cropPath.map(p => {
+      const px = (offX + p.nx * rendW)/wW;
+      const py = (offY + p.ny * rendH)/wH;
+      return `${px.toFixed(4)},${py.toFixed(4)}`;
+    }).join(' ');
+    cutoutShape = `<polygon points="${pts}" fill="black"/>`;
+    if (!cropBgColor) {
+      borderShape = `<polygon points="${pts}" fill="none"
+        stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>`;
+    }
+  } else { // rect
+    cutoutShape = `<rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}" fill="black"/>`;
+    if (!cropBgColor) {
+      borderShape = `
+        <rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}"
+              fill="none" stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>
+        <rect x="${nx1-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+        <rect x="${nx1+nw-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+        <rect x="${nx1-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+        <rect x="${nx1+nw-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+      `;
+    }
+  }
 
   svg.setAttribute('viewBox', '0 0 1 1');
   svg.innerHTML = `
     <defs>
       <mask id="cm${svgId}">
         <rect x="0" y="0" width="1" height="1" fill="white"/>
-        <rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}" fill="black"/>
+        ${cutoutShape}
       </mask>
     </defs>
-    <rect x="0" y="0" width="1" height="1" fill="rgba(0,0,0,0.5)" mask="url(#cm${svgId})"/>
-    <rect x="${nx1}" y="${ny1}" width="${nw}" height="${nh}"
-          fill="none" stroke="#ffb800" stroke-width="0.004" stroke-dasharray="0.02 0.012"/>
-    <rect x="${nx1-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
-    <rect x="${nx1+nw-cs/2}" y="${ny1-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
-    <rect x="${nx1-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
-    <rect x="${nx1+nw-cs/2}" y="${ny1+nh-cs/2}" width="${cs}" height="${cs}" fill="#ffb800"/>
+    <rect x="0" y="0" width="1" height="1" fill="${outsideFill}" mask="url(#cm${svgId})"/>
+    ${borderShape}
   `;
   svg.classList.add('vis');
 }
@@ -1007,22 +687,72 @@ function screenToNorm(clientX, clientY) {
 function drawRubberBand(canvas, x0, y0, x1, y1) {
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const rx = Math.min(x0,x1), ry = Math.min(y0,y1);
-  const rw = Math.abs(x1-x0), rh = Math.abs(y1-y0);
   ctx.fillStyle = 'rgba(0,0,0,0.4)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.clearRect(rx, ry, rw, rh);
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0,0,0,1)';
+  ctx.beginPath();
+  if (cropShape === 'circle') {
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const r = Math.hypot(x1 - x0, y1 - y0) / 2;
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  } else {
+    const rx = Math.min(x0, x1), ry = Math.min(y0, y1);
+    const rw = Math.abs(x1 - x0), rh = Math.abs(y1 - y0);
+    ctx.rect(rx, ry, rw, rh);
+  }
+  ctx.fill();
+  ctx.restore();
+
   ctx.strokeStyle = '#ffb800';
   ctx.lineWidth = 2;
-  ctx.setLineDash([6,4]);
-  ctx.strokeRect(rx, ry, rw, rh);
-  // Corner squares
-  const cs = 6;
-  ctx.fillStyle = '#ffb800';
-  ctx.setLineDash([]);
-  [[rx,ry],[rx+rw,ry],[rx,ry+rh],[rx+rw,ry+rh]].forEach(([cx,cy]) =>
-    ctx.fillRect(cx-cs/2, cy-cs/2, cs, cs)
-  );
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  if (cropShape === 'circle') {
+    const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+    const r = Math.hypot(x1 - x0, y1 - y0) / 2;
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.stroke();
+  } else {
+    const rx = Math.min(x0, x1), ry = Math.min(y0, y1);
+    const rw = Math.abs(x1 - x0), rh = Math.abs(y1 - y0);
+    ctx.strokeRect(rx, ry, rw, rh);
+    const cs = 6;
+    ctx.fillStyle = '#ffb800';
+    ctx.setLineDash([]);
+    [[rx, ry], [rx + rw, ry], [rx, ry + rh], [rx + rw, ry + rh]].forEach(([cx, cy]) =>
+      ctx.fillRect(cx - cs / 2, cy - cs / 2, cs, cs)
+    );
+  }
+}
+
+function drawFreeformPath(canvas, points) {
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  if (!points || points.length < 2) return;
+
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.fillStyle = 'rgba(0,0,0,1)';
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = '#ffb800';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([6, 4]);
+  ctx.beginPath();
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+  ctx.closePath();
+  ctx.stroke();
 }
 
 function setupCropDraw(canvasId) {
@@ -1036,24 +766,68 @@ function setupCropDraw(canvasId) {
     cropDragNorm = screenToNorm(clientX, clientY);
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (cropShape === 'freeform') {
+      lastFreeformPxPath = [{ x: cropDragPx.x0, y: cropDragPx.y0, nx: cropDragNorm.nx, ny: cropDragNorm.ny }];
+    } else {
+      lastFreeformPxPath = null;
+    }
     return true;
   }
   function onMove(clientX, clientY) {
     if (!cropDrawing) return;
     const rect = canvas.getBoundingClientRect();
     const px1 = clientX - rect.left, py1 = clientY - rect.top;
-    drawRubberBand(canvas, cropDragPx.x0, cropDragPx.y0, px1, py1);
+    if (cropShape === 'freeform') {
+      const norm = screenToNorm(clientX, clientY);
+      lastFreeformPxPath.push({ x: px1, y: py1, nx: norm.nx, ny: norm.ny });
+      drawFreeformPath(canvas, lastFreeformPxPath);
+    } else {
+      drawRubberBand(canvas, cropDragPx.x0, cropDragPx.y0, px1, py1);
+    }
   }
   function onUp(clientX, clientY) {
     if (!cropDrawing) return;
     cropDrawing = false;
     const end = screenToNorm(clientX, clientY);
-    const x = Math.min(cropDragNorm.nx, end.nx);
-    const y = Math.min(cropDragNorm.ny, end.ny);
-    const w = Math.abs(end.nx - cropDragNorm.nx);
-    const h = Math.abs(end.ny - cropDragNorm.ny);
-    if (w > 0.02 && h > 0.02) {
-      crop = { x, y, w, h }; hasCrop = true;
+
+    if (cropShape === 'freeform') {
+      const path = lastFreeformPxPath || [];
+      if (path.length > 3) {
+        // Bounding box of normalized points
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const p of path) {
+          if (p.nx < minX) minX = p.nx;
+          if (p.ny < minY) minY = p.ny;
+          if (p.nx > maxX) maxX = p.nx;
+          if (p.ny > maxY) maxY = p.ny;
+        }
+        const w = maxX - minX, h = maxY - minY;
+        if (w > 0.02 && h > 0.02) {
+          crop = { x: minX, y: minY, w, h };
+          cropPath = path.map(p => ({ nx: p.nx, ny: p.ny }));
+          hasCrop = true;
+        }
+      }
+      lastFreeformPxPath = null;
+    } else if (cropShape === 'circle') {
+      const cx = (cropDragNorm.nx + end.nx) / 2;
+      const cy = (cropDragNorm.ny + end.ny) / 2;
+      const r  = Math.hypot(end.nx - cropDragNorm.nx, end.ny - cropDragNorm.ny) / 2;
+      if (r > 0.01) {
+        crop = { x: cx - r, y: cy - r, w: 2 * r, h: 2 * r };
+        cropPath = null;
+        hasCrop = true;
+      }
+    } else { // rect
+      const x = Math.min(cropDragNorm.nx, end.nx);
+      const y = Math.min(cropDragNorm.ny, end.ny);
+      const w = Math.abs(end.nx - cropDragNorm.nx);
+      const h = Math.abs(end.ny - cropDragNorm.ny);
+      if (w > 0.02 && h > 0.02) {
+        crop = { x, y, w, h };
+        cropPath = null;
+        hasCrop = true;
+      }
     }
     exitCropMode();
     applyVideoTransform();
@@ -1124,6 +898,7 @@ document.getElementById('fsCropBtn').addEventListener('click', () => {
 
 function resetCrop() {
   crop = { x:0, y:0, w:1, h:1 }; hasCrop = false; zoomLevel = 1;
+  cropPath = null;
   exitCropMode();
   document.getElementById('cropSvg').classList.remove('vis');
   document.getElementById('fsCropSvg').classList.remove('vis');
@@ -1159,6 +934,7 @@ const fsVidWrap  = document.getElementById('fsVideoWrap');
 const vidWrap    = document.getElementById('videoWrap');
 
 function enterFS() {
+  if (bounceOn && typeof stopBounce === 'function') stopBounce();
   isFS = true;
   fsOverlay.classList.add('active');
   fsVidWrap.insertBefore(vid, document.getElementById('fsCropCanvas'));
@@ -1168,6 +944,7 @@ function enterFS() {
   requestAnimationFrame(() => { applyVideoTransform(); updateTimeline(); });
 }
 function exitFS() {
+  if (bounceOn && typeof stopBounce === 'function') stopBounce();
   isFS = false;
   fsOverlay.classList.remove('active');
   vidWrap.insertBefore(vid, document.getElementById('cropCanvas'));
@@ -1249,13 +1026,132 @@ new ResizeObserver(() => { if (isFS) { applyVideoTransform(); updateTimeline(); 
   .observe(document.getElementById('fsVideoWrap'));
 
 // ═══════════════════════════════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════════════════════════════
+(function setupThemeToggle() {
+  const themeDark  = document.getElementById('themeDark');
+  const themeLight = document.getElementById('themeLight');
+  const themeBtn   = document.getElementById('themeToggle');
+
+  function applyTheme(mode) {
+    const dark = mode === 'dark';
+    themeDark.disabled  = !dark;
+    themeLight.disabled =  dark;
+    themeBtn.textContent = dark ? '☀ LIGHT' : '🌙 DARK';
+    try { localStorage.setItem('raccoon-theme', mode); } catch (_) {}
+    // Crop overlay uses --overlay tones — redraw to reflect any colour change.
+    if (typeof applyVideoTransform === 'function') applyVideoTransform();
+  }
+  themeBtn.addEventListener('click', () => {
+    applyTheme(themeDark.disabled ? 'dark' : 'light');
+  });
+  let stored = 'dark';
+  try { stored = localStorage.getItem('raccoon-theme') || 'dark'; } catch (_) {}
+  applyTheme(stored);
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+// EFFECTS — shape picker + colour palette + bounce
+// ═══════════════════════════════════════════════════════════════════
+document.querySelectorAll('.shape-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.shape-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    cropShape = btn.dataset.shape;
+    if (hasCrop) applyVideoTransform();
+  });
+});
+
+document.querySelectorAll('#colorPalette .color-swatch').forEach(sw => {
+  sw.addEventListener('click', () => {
+    document.querySelectorAll('#colorPalette .color-swatch').forEach(s => s.classList.remove('active'));
+    sw.classList.add('active');
+    const c = sw.dataset.color;
+    cropBgColor = (c === 'none') ? null : c;
+    applyVideoTransform();
+  });
+});
+
+// ── Bounce ──
+function getBounceArea() {
+  if (isFS) return { w: window.innerWidth, h: window.innerHeight };
+  const w = document.getElementById('videoWrap');
+  return { w: w.clientWidth, h: w.clientHeight };
+}
+
+function bounceTick(now) {
+  if (!bounceOn) { bounceRAF = null; return; }
+  const dt = bounceLastT ? Math.min(0.05, (now - bounceLastT) / 1000) : 0;
+  bounceLastT = now;
+
+  const wrap = document.getElementById(isFS ? 'fsVideoWrap' : 'videoWrap');
+  const { w, h } = getBounceArea();
+  const ww = wrap.clientWidth, wh = wrap.clientHeight;
+
+  bounceX += bounceVX * dt;
+  bounceY += bounceVY * dt;
+
+  const maxX = Math.max(0, w - ww);
+  const maxY = Math.max(0, h - wh);
+  if (bounceX < 0)    { bounceX = 0;    bounceVX = Math.abs(bounceVX); }
+  if (bounceX > maxX) { bounceX = maxX; bounceVX = -Math.abs(bounceVX); }
+  if (bounceY < 0)    { bounceY = 0;    bounceVY = Math.abs(bounceVY); }
+  if (bounceY > maxY) { bounceY = maxY; bounceVY = -Math.abs(bounceVY); }
+
+  wrap.style.transform = `translate(${bounceX}px, ${bounceY}px)`;
+  bounceRAF = requestAnimationFrame(bounceTick);
+}
+
+function startBounce() {
+  bounceOn = true;
+  const wrap = document.getElementById(isFS ? 'fsVideoWrap' : 'videoWrap');
+  const { w, h } = getBounceArea();
+  bounceX = Math.random() * Math.max(0, w - wrap.clientWidth);
+  bounceY = Math.random() * Math.max(0, h - wrap.clientHeight);
+  const angle = Math.random() * Math.PI * 2;
+  bounceVX = Math.cos(angle) * bounceSpeedPx;
+  bounceVY = Math.sin(angle) * bounceSpeedPx;
+  bounceLastT = 0;
+  const tb = document.getElementById('bounceToggle');
+  tb.textContent = '↗ BOUNCE ON';
+  tb.classList.add('active');
+  bounceRAF = requestAnimationFrame(bounceTick);
+}
+
+function stopBounce() {
+  bounceOn = false;
+  if (bounceRAF) cancelAnimationFrame(bounceRAF);
+  bounceRAF = null;
+  document.getElementById('videoWrap').style.transform = '';
+  document.getElementById('fsVideoWrap').style.transform = '';
+  const tb = document.getElementById('bounceToggle');
+  tb.textContent = '↗ BOUNCE OFF';
+  tb.classList.remove('active');
+}
+
+document.getElementById('bounceToggle').addEventListener('click', () => {
+  bounceOn ? stopBounce() : startBounce();
+});
+
+(function setupBounceSpeedSlider() {
+  const bsEl = document.getElementById('bounceSpeed');
+  const bsVal = document.getElementById('bounceSpeedVal');
+  bsEl.addEventListener('input', () => {
+    bounceSpeedPx = parseFloat(bsEl.value);
+    bsVal.textContent = bounceSpeedPx + ' px/s';
+    const cur = Math.hypot(bounceVX, bounceVY) || 1;
+    bounceVX = bounceVX / cur * bounceSpeedPx;
+    bounceVY = bounceVY / cur * bounceSpeedPx;
+  });
+})();
+
+// ═══════════════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════════════
 loadVideoList();
 setTarget(120);
 updateTimeline();
 applyVideoTransform();
-vid.load();
 </script>
 </body>
 </html>
