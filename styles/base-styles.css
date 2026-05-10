@@ -793,3 +793,26 @@ input[type=range]::-moz-range-thumb {
 }
 .marker-actions .btn { flex: 1 1 auto; min-width: 0; }
 .marker-actions .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── MEDIA LIBRARY SECTIONS ──────────────────────────────── */
+.library-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.library-section + .library-section {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.library-section-label {
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.library-section-label code {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--accent2, var(--accent));
+}

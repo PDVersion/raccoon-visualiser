@@ -47,18 +47,31 @@
   <!-- VIDEO LIBRARY PANEL -->
   <div class="panel" data-panel-id="library">
     <div class="panel-handle" draggable="true">
-      <span class="panel-label">Media Library — resources/ folder</span>
+      <span class="panel-label">Media Library</span>
       <button class="panel-collapse-btn" title="Collapse">▾</button>
     </div>
     <div class="panel-body">
-      <div class="video-list" id="videoList">
-        <div class="no-videos">Loading…</div>
+
+      <div class="library-section">
+        <div class="library-section-label">Library — <code>resources/</code></div>
+        <div class="video-list" id="videoList">
+          <div class="no-videos">Loading…</div>
+        </div>
+        <div class="info-row">
+          Place video, GIF, or WebP files in <code>resources/</code> and list them in
+          <code>resources/manifest.json</code> as an array of filenames.
+          Click <strong>✎</strong> on a row to mark its native beats; a
+          <strong style="color: var(--accent);">●</strong> appears once a source BPM is cached.
+        </div>
       </div>
-      <div class="info-row">
-        Place video, GIF, or WebP files in the <code>resources/</code> folder and list them in
-        <code>resources/manifest.json</code> as an array of filenames,
-        e.g. <code>["clip1.mp4","loop.gif","anim.webp"]</code>.
+
+      <div class="library-section">
+        <div class="library-section-label">Uploads</div>
+        <div class="video-list">
+          <div class="no-videos">Upload coming soon — local file picker, IndexedDB-backed.</div>
+        </div>
       </div>
+
     </div>
   </div>
 

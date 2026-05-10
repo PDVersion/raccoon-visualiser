@@ -197,6 +197,9 @@ async function openMarker(fileKey, mediaKind) {
 
 function closeMarker() {
   if (_mk.abortCtl) { try { _mk.abortCtl.abort(); } catch (_) {} }
+  // Image kind stores the same bitmap reference in both arrays, so we only
+  // need to close one set; video kind populates thumbs only.
+  _mk.thumbs.forEach(t => { try { t.bitmap.close(); } catch (_) {} });
   _mk.isOpen     = false;
   _mk.fileKey    = null;
   _mk.thumbs     = [];
