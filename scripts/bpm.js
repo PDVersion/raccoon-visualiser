@@ -8,9 +8,6 @@
 function applyBPM() {
   const rate = nativeBPM ? Math.max(0.0625, Math.min(16, targetBPM / nativeBPM)) : 1;
   vid.playbackRate = rate;
-  if (mediaMode === 'sprite' && typeof setSpriteBpm === 'function') {
-    setSpriteBpm(targetBPM);
-  }
   const d = targetBPM.toFixed(1);
   document.getElementById('speedBadge').textContent   = rate.toFixed(3) + '×';
   document.getElementById('bpmDisplay').textContent   = d;
