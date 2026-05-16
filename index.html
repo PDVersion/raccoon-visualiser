@@ -259,39 +259,26 @@
     </div>
   </div>
 
-  <!-- BEAT MARKER PANEL -->
+  <!-- SOURCE BPM PANEL — manual per-clip BPM the playback rate is derived against -->
   <div class="panel" data-panel-id="markers">
     <div class="panel-handle" draggable="true">
-      <span class="panel-label">Beat Markers</span>
+      <span class="panel-label">Source BPM</span>
       <button class="panel-collapse-btn" title="Collapse">▾</button>
     </div>
     <div class="panel-body">
-      <div class="info-row marker-empty" id="markerEmpty">
-        Click <strong>✎</strong> next to a library clip, then tap the thumbnail at every beat
-        (peak of a bounce, downbeat of a spin). Min 4 markers; 8–12 is more accurate.
+      <div class="bpm-editor">
+        <div class="bpm-editor-row">
+          <input type="number" class="bpm-input" id="sourceBpmInput"
+                 min="1" max="400" step="0.1" placeholder="—" disabled>
+          <button class="btn" id="sourceBpmResetBtn" title="Reset to the value in resources/manifest.json" disabled>Reset</button>
+          <button class="btn" id="sourceBpmCopyBtn" title="Copy a manifest snippet to clipboard" disabled>Copy JSON</button>
+        </div>
+        <div class="bpm-editor-status info-row" id="sourceBpmStatus">No clip loaded</div>
       </div>
-      <div class="marker-active hidden" id="markerActive">
-        <div class="marker-header">
-          <span class="panel-label" id="markerFilename"></span>
-          <span class="marker-progress hidden" id="markerProgress">
-            <span id="markerProgressText">Extracting frames…</span>
-            <span id="markerProgressPct">0%</span>
-          </span>
-        </div>
-        <div class="marker-strip-wrap">
-          <div class="marker-strip" id="markerStrip"></div>
-        </div>
-        <div class="marker-stats">
-          <span>Marked: <span id="markerCount">0</span></span>
-          <span>Source BPM: <span id="markerBpm">—</span></span>
-        </div>
-        <div class="info-row marker-warn hidden" id="markerWarn"></div>
-        <div class="marker-actions">
-          <button class="btn" id="markerPreviewBtn">Preview</button>
-          <button class="btn" id="markerClearBtn">Clear</button>
-          <button class="btn" id="markerSaveBtn" disabled>Save</button>
-          <button class="btn" id="markerCloseBtn">Close</button>
-        </div>
+      <div class="info-row">
+        Sets the clip's source (native) BPM. Playback rate = target ÷ source.
+        Edits apply for this session only — to persist, paste the JSON snippet into
+        <code>resources/manifest.json</code>.
       </div>
     </div>
   </div>

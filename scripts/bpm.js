@@ -29,6 +29,9 @@ function setNative(bpm) {
   document.getElementById('infoRow').textContent =
     `Native ${nativeBPM.toFixed(1)} BPM → playing at ${(targetBPM/nativeBPM).toFixed(3)}× speed.`;
   applyBPM();
+  // Keep the Source BPM editor in sync — it observes nativeBPM and the
+  // current manifest value. Defined in scripts/marker.js.
+  if (typeof refreshSourceBpmEditor === 'function') refreshSourceBpmEditor();
 }
 
 function highlightPreset() {
