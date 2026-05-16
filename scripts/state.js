@@ -6,11 +6,10 @@
 // ═══════════════════════════════════════════════════════════════════
 
 // Media elements + mode
-var vid       = document.getElementById('vid');
-var vidImg    = document.getElementById('vidImg');
-var vidSprite = document.getElementById('vidSprite');
+var vid    = document.getElementById('vid');
+var vidImg = document.getElementById('vidImg');
 var DURATION  = 17.016667;
-var mediaMode = 'video';   // 'video' | 'image' | 'sprite'
+var mediaMode = 'video';   // 'video' | 'image'
 
 // BPM
 var nativeBPM = null;
@@ -55,8 +54,9 @@ var bounceLastT   = 0;
 var bounceRAF     = null;
 
 // Library
-var currentVideo = null;
-var MEDIA_FOLDER = 'resources';
+var currentVideo       = null;
+var currentManifestBPM = null;     // sourceBPM from the active library entry
+var MEDIA_FOLDER       = 'resources';
 
 // Beat flash
 var beatInterval = null;

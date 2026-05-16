@@ -12,10 +12,9 @@ function enterFS() {
   const fsVidWrap = document.getElementById('fsVideoWrap');
 
   fsOverlay.classList.add('active');
-  // Move every media element so any kind (video / image / sprite) works in FS.
-  fsVidWrap.insertBefore(vid,       document.getElementById('fsCropCanvas'));
-  fsVidWrap.insertBefore(vidImg,    document.getElementById('fsCropCanvas'));
-  fsVidWrap.insertBefore(vidSprite, document.getElementById('fsCropCanvas'));
+  // Move BOTH the video and image elements so either media kind works in FS.
+  fsVidWrap.insertBefore(vid,    document.getElementById('fsCropCanvas'));
+  fsVidWrap.insertBefore(vidImg, document.getElementById('fsCropCanvas'));
   vid.style.maxWidth    = '100%'; vid.style.maxHeight    = '100%';
   vidImg.style.maxWidth = '100%'; vidImg.style.maxHeight = '100%';
   // Clear any stale bounce transform on the wrap since we now move the media.
@@ -35,9 +34,8 @@ function exitFS() {
   const vidWrap   = document.getElementById('videoWrap');
 
   fsOverlay.classList.remove('active');
-  vidWrap.insertBefore(vid,       document.getElementById('cropCanvas'));
-  vidWrap.insertBefore(vidImg,    document.getElementById('cropCanvas'));
-  vidWrap.insertBefore(vidSprite, document.getElementById('cropCanvas'));
+  vidWrap.insertBefore(vid,    document.getElementById('cropCanvas'));
+  vidWrap.insertBefore(vidImg, document.getElementById('cropCanvas'));
   vid.style.maxWidth    = ''; vid.style.maxHeight    = '';
   vidImg.style.maxWidth = ''; vidImg.style.maxHeight = '';
   // Clear any FS bounce transform from the media before we switch modes.

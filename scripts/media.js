@@ -17,19 +17,13 @@ function isImageMedia(name) {
 }
 
 function getActiveMedia() {
-  if (mediaMode === 'sprite') return vidSprite;
-  if (mediaMode === 'image')  return vidImg;
-  return vid;
+  return mediaMode === 'image' ? vidImg : vid;
 }
 
 function getActiveSize() {
-  if (mediaMode === 'sprite') {
-    const meta = (typeof currentSpriteMeta === 'function') ? currentSpriteMeta() : null;
-    if (meta) return { w: meta.frameW, h: meta.frameH };
-    return { w: vidSprite.clientWidth || 1, h: vidSprite.clientHeight || 1 };
-  }
-  if (mediaMode === 'image') return { w: vidImg.naturalWidth || 1, h: vidImg.naturalHeight || 1 };
-  return { w: vid.videoWidth || 9, h: vid.videoHeight || 16 };
+  return mediaMode === 'image'
+    ? { w: vidImg.naturalWidth || 1, h: vidImg.naturalHeight || 1 }
+    : { w: vid.videoWidth    || 9, h: vid.videoHeight    || 16 };
 }
 
 function fmtDur(s) {

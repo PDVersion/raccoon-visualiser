@@ -32,14 +32,12 @@ function applyVideoTransform() {
   const tx = wW / 2 - cropCX * scale;
   const ty = wH / 2 - cropCY * scale;
 
-  // Apply transform to the active media element only; clear all inactive
-  // elements so stale transforms from a prior mode don't show through.
+  // Apply transform to the active media element only; clear the inactive one.
   const active = getActiveMedia();
   active.style.transformOrigin = 'top left';
   active.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
-  [vid, vidImg, vidSprite].forEach(el => {
-    if (el && el !== active) el.style.transform = '';
-  });
+  const inactive = active === vid ? vidImg : vid;
+  inactive.style.transform = '';
 
   const zpct = Math.round(zoomLevel * 100);
   document.getElementById('zoomVal').textContent  = zpct + '%';

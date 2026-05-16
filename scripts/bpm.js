@@ -8,9 +8,6 @@
 function applyBPM() {
   const rate = nativeBPM ? Math.max(0.0625, Math.min(16, targetBPM / nativeBPM)) : 1;
   vid.playbackRate = rate;
-  if (mediaMode === 'sprite' && typeof setSpriteBpm === 'function') {
-    setSpriteBpm(targetBPM);
-  }
   const d = targetBPM.toFixed(1);
   document.getElementById('speedBadge').textContent   = rate.toFixed(3) + '×';
   document.getElementById('bpmDisplay').textContent   = d;
@@ -32,6 +29,9 @@ function setNative(bpm) {
   document.getElementById('infoRow').textContent =
     `Native ${nativeBPM.toFixed(1)} BPM → playing at ${(targetBPM/nativeBPM).toFixed(3)}× speed.`;
   applyBPM();
+  // Keep the Source BPM editor in sync — it observes nativeBPM and the
+  // current manifest value. Defined in scripts/marker.js.
+  if (typeof refreshSourceBpmEditor === 'function') refreshSourceBpmEditor();
 }
 
 function highlightPreset() {
