@@ -29,6 +29,7 @@ function setupResize() {
   setupFullscreen();
   setupEffects();
   setupLibrary();
+  setupMarker();
   setupSpotify();
   setupResize();
 

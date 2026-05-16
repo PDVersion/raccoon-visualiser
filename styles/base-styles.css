@@ -136,7 +136,7 @@ h1 span { color: var(--accent); }
   will-change: transform;
 }
 
-video, #vidImg {
+video, #vidImg, #vidSprite {
   display: block;
   max-width: 100%;
   max-height: 100%;
@@ -144,7 +144,13 @@ video, #vidImg {
   height: auto;
   transform-origin: top left;
 }
-video[hidden], #vidImg[hidden] { display: none !important; }
+video[hidden], #vidImg[hidden], #vidSprite[hidden] { display: none !important; }
+#vidSprite {
+  background-repeat: no-repeat;
+  /* width/height are set inline by sprite-playback.js to the source frame
+     dimensions; max-* above keeps the element within the wrap for
+     non-FS layout. The transform pipeline scales it like other media. */
+}
 
 .fs-btn {
   position: absolute; top: 8px; right: 8px; z-index: 30;
@@ -663,3 +669,150 @@ input[type=range]::-moz-range-thumb {
 
 .spotify-panel a { color: var(--accent2); text-decoration: none; }
 .spotify-panel a:hover { text-decoration: underline; }
+
+/* ── BEAT MARKER PANEL ─────────────────────────────────────── */
+.video-item { position: relative; }
+.video-item-marked {
+  font-size: 0.7rem;
+  color: var(--accent);
+  flex-shrink: 0;
+  line-height: 1;
+}
+.video-item-action {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 3px;
+  width: 22px;
+  height: 22px;
+  font-size: 0.7rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+.video-item-action:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.video-item-action:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.marker-empty { line-height: 1.6; }
+.marker-active { display: flex; flex-direction: column; gap: 10px; }
+.marker-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+.marker-progress {
+  font-size: 0.6rem;
+  color: var(--accent2);
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.marker-strip-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  max-width: 100%;
+}
+.marker-strip-wrap::-webkit-scrollbar { height: 6px; }
+.marker-strip-wrap::-webkit-scrollbar-track { background: transparent; }
+.marker-strip-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.marker-strip {
+  display: flex;
+  gap: 2px;
+  padding: 6px;
+  min-width: min-content;
+}
+.marker-cell {
+  position: relative;
+  flex: 0 0 auto;
+  padding: 4px 0 0 0;
+  border-radius: 2px;
+  cursor: pointer;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  user-select: none;
+  border: 1px solid transparent;
+  transition: border-color 0.1s, background 0.1s;
+}
+.marker-cell canvas {
+  display: block;
+  height: 64px;
+  width: auto;
+  border-radius: 2px;
+  opacity: 0.85;
+  transition: opacity 0.1s;
+}
+.marker-cell:hover { border-color: var(--border); background: var(--hover-tint, rgba(255,255,255,0.04)); }
+.marker-cell:hover canvas { opacity: 1; }
+.marker-cell.marked {
+  border-color: var(--accent);
+  background: var(--accent-tint-1, rgba(255,184,0,0.08));
+}
+.marker-cell.marked canvas { opacity: 1; }
+.marker-cell.marked::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 2px 2px 0 0;
+}
+.marker-cell-label {
+  font-size: 0.55rem;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+  padding: 2px 4px 4px;
+}
+.marker-cell.marked .marker-cell-label { color: var(--accent); }
+
+.marker-stats {
+  display: flex; gap: 16px; align-items: center; flex-wrap: wrap;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.marker-stats > span > span { color: var(--accent); }
+.marker-warn {
+  color: var(--accent2, var(--accent));
+  line-height: 1.5;
+}
+.marker-actions {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.marker-actions .btn { flex: 1 1 auto; min-width: 0; }
+.marker-actions .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ── MEDIA LIBRARY SECTIONS ──────────────────────────────── */
+.library-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.library-section + .library-section {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.library-section-label {
+  font-size: 0.6rem;
+  color: var(--muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.library-section-label code {
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--accent2, var(--accent));
+}
