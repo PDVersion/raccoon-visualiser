@@ -1,6 +1,15 @@
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════════
+// DORMANT — not loaded by index.html. Requires <div id="vidSprite">
+// to be re-added to both #videoWrap and #fsVideoWrap, the var
+// `vidSprite` to be reinstated in scripts/state.js, and the sprite
+// branches restored in media.js / library.js / fullscreen.js /
+// transform.js / bpm.js. Re-enable when animated-image retiming
+// returns.
+// ═══════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════
 // SPRITE PLAYBACK — drives #vidSprite with a CSS @keyframes animation
 // that scrubs through a horizontal sprite sheet via background-position.
 // The animation duration is controlled by a CSS custom property that

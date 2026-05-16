@@ -1,6 +1,11 @@
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════════
+// DORMANT — not loaded by index.html. Re-add the <script> tag when
+// animated-image retiming (sprite-sheet path) is re-enabled.
+// ═══════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════
 // MEDIA DECODE — frame extraction for the beat-marker UI.
 //
 // Video: hidden <video> element + canvas seeking. No external deps.

@@ -1,6 +1,11 @@
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════════
+// DORMANT — not loaded by index.html. Re-add the <script> tag when
+// animated-image retiming (sprite-sheet path) is re-enabled.
+// ═══════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════
 // PROCESSED-MEDIA CACHE — IndexedDB wrapper that persists derived data
 // (marker-derived source BPM, marker positions, optional sprite sheet)
 // keyed by file path. Survives reloads so a marked clip auto-applies

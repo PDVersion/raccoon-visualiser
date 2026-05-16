@@ -1,6 +1,11 @@
 'use strict';
 
 // ═══════════════════════════════════════════════════════════════════
+// DORMANT — not loaded by index.html. Re-add the <script> tag when
+// animated-image retiming is re-enabled.
+// ═══════════════════════════════════════════════════════════════════
+
+// ═══════════════════════════════════════════════════════════════════
 // SPRITE-SHEET BUILDER — composites an array of decoded frames into
 // a single horizontal PNG sprite sheet, preserving transparency.
 // The returned blob is stored in the processed-media cache so the
