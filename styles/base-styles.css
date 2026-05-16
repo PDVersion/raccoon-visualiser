@@ -664,32 +664,21 @@ input[type=range]::-moz-range-thumb {
 .spotify-panel a { color: var(--accent2); text-decoration: none; }
 .spotify-panel a:hover { text-decoration: underline; }
 
-/* ── BEAT MARKER PANEL ─────────────────────────────────────── */
+/* ── LIBRARY ROW BPM BADGE ─────────────────────────────────── */
 .video-item { position: relative; }
-.video-item-marked {
-  font-size: 0.7rem;
+.video-item-bpm {
+  font-size: 0.6rem;
   color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  padding: 1px 5px;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
   flex-shrink: 0;
-  line-height: 1;
+  line-height: 1.2;
+  opacity: 0.85;
 }
-.video-item-action {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--muted);
-  border-radius: 3px;
-  width: 22px;
-  height: 22px;
-  font-size: 0.7rem;
-  cursor: pointer;
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  transition: border-color 0.15s, color 0.15s;
-}
-.video-item-action:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
-.video-item-action:disabled { opacity: 0.35; cursor: not-allowed; }
+.video-item.active .video-item-bpm { opacity: 1; }
 
 .marker-empty { line-height: 1.6; }
 .marker-active { display: flex; flex-direction: column; gap: 10px; }

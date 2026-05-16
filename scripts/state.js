@@ -54,8 +54,9 @@ var bounceLastT   = 0;
 var bounceRAF     = null;
 
 // Library
-var currentVideo = null;
-var MEDIA_FOLDER = 'resources';
+var currentVideo       = null;
+var currentManifestBPM = null;     // sourceBPM from the active library entry
+var MEDIA_FOLDER       = 'resources';
 
 // Beat flash
 var beatInterval = null;
